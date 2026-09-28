@@ -1,0 +1,14 @@
+# CrocoGallery notebook IDs rendered into workspace/ (in this CROCODILEworkspace folder) when
+# --notebooks is passed to install.sh (and included by --all and --workshop).
+# One ID per line. Blank lines and lines starting with '#' are ignored.
+# List available IDs with: crocogallery template --list-notebooks
+crocodash.tutorial-ocn
+crocodash.tutorial-ocn-wav
+crocodash.tutorial-ocn-wav-ice
+crocodash.projects.bering_diagnostics
+model2obs.tutorial_MOM6-CL-comparison-Hawaii
+model2obs.tutorial_MOM6-CL-comparison-NWA-parallel
+model2obs.tutorial_CrocoLake_map_temperature
+dart.tutorial1_real_observations
+dart.tutorial2_synthetic_observations
+dart.tutorial3_cycling_dart_cesm

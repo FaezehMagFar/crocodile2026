@@ -1,0 +1,1083 @@
+From e80e8414016c8ac5d24d13d50d52dfe544cf035a Mon Sep 17 00:00:00 2001
+From: Faezeh Maghsoodifar <fmaghsoodifar@crimson.ua.edu>
+Date: Thu, 1 Oct 2026 14:32:47 -0600
+Subject: [PATCH] Add full ERA5 atmospheric forcing for CrocoDash
+
+---
+ CrocoDash/forcing/atm.py                      | 227 ++++++++++
+ .../raw_data_access/datasets/era5_atmos.py    | 400 ++++++++++++++++++
+ NOTICE                                        |  18 +
+ .../source/for_users/3a_configure_forcings.md |  58 +++
+ tests/forcing/test_atm.py                     | 128 +++++-
+ tests/forcing/test_configurators.py           |  30 +-
+ tests/raw_data_access/test_era5_atmos.py      |  99 +++++
+ 7 files changed, 958 insertions(+), 2 deletions(-)
+ create mode 100644 CrocoDash/raw_data_access/datasets/era5_atmos.py
+ create mode 100644 NOTICE
+ create mode 100644 tests/raw_data_access/test_era5_atmos.py
+
+diff --git a/CrocoDash/forcing/atm.py b/CrocoDash/forcing/atm.py
+index 9c1ff26..12794d8 100644
+--- a/CrocoDash/forcing/atm.py
++++ b/CrocoDash/forcing/atm.py
+@@ -1,5 +1,8 @@
+ """Align data-model (DATM/DROF) forcing streams with the case's run dates.
+ 
++ERA5 atmospheric-forcing extension added by Faezeh Maghsoodifar in 2026.
++This file modifies the upstream CrocoDash source distributed under Apache-2.0.
++
+ CDEPS hardcodes ``year_align=1`` and the full year span for every JRA stream in
+ ``stream_definition_{datm,drof}.xml``, and the ``DATM_YR_ALIGN``/``_START``/
+ ``_END`` xml variables are only read by the CLM/GSWP3/NEON/CPLHIST stream sets
+@@ -13,6 +16,8 @@ are merged, so retagging the years alone still leaves all 59 JRA files
+ enumerated, and CDEPS opens each one to build its time axis.
+ """
+ 
++from pathlib import Path
++
+ from CrocoDash.forcing.base import *
+ from CrocoDash.forcing import cdeps_streams, user_nl_blocks
+ from CrocoDash.logging import setup_logger
+@@ -181,3 +186,225 @@ class StreamYearConfigurator(BaseConfigurator):
+             self.set_output_param(f"{component}_streams", plan)
+ 
+         super().configure()
++
++
++@register
++class ERA5AtmosphereConfigurator(BaseConfigurator):
++    """Use prepared ERA5 files as the atmosphere forcing for a JRA DATM case.
++
++    ``DATM%JRA`` is retained as the *interface*, not as the data source.  Its
++    data mode publishes the bottom-atmosphere fields the CESM ocean mediator
++    consumes (``Sa_u``, ``Sa_v``, ``Sa_tbot``, ``Sa_shum``, ``Sa_pbot`` and
++    ``Sa_dens``).  In ``full`` mode every required JRA stream is redirected to
++    ERA5.  ``wind_pressure`` mode exists for short sensitivity experiments and
++    redirects only u10, v10 and msl, leaving the other five streams on JRA.
++
++    Inputs are CDEPS-ready NetCDF files.  In particular, ``q2m`` must be
++    specific humidity in kg/kg, ``precip`` a water-mass flux in kg m-2 s-1,
++    and ``swdn``/``lwdn`` fluxes in W m-2.  Raw ERA5 dew point and accumulated
++    radiation/precipitation cannot be passed directly.  Each dict value may be
++    one path or a chronological list of paths; multiple fields may point at
++    the same combined NetCDF file.
++    """
++
++    name = "ERA5Atmosphere"
++    allowed_compsets = ["DATM%JRA"]
++
++    # Key: (JRA stream-name suffix, CDEPS field name, default NetCDF variable)
++    _FIELDS = {
++        "precip": ("PREC", "Faxa_prec", "precip"),
++        "lwdn": ("LWDN", "Faxa_lwdn", "lwdn"),
++        "swdn": ("SWDN", "Faxa_swdn", "swdn"),
++        "q2m": ("Q_10", "Sa_shum", "q2m"),
++        "msl": ("SLP_", "Sa_pslv", "msl"),
++        "t2m": ("T_10", "Sa_tbot", "t2m"),
++        "u10": ("U_10", "Sa_u", "u10"),
++        "v10": ("V_10", "Sa_v", "v10"),
++    }
++    _MODE_FIELDS = {
++        "full": tuple(_FIELDS),
++        "wind_pressure": ("u10", "v10", "msl"),
++    }
++
++    input_params = [
++        InputValueParam(
++            "era5_atmosphere_files",
++            comment="CDEPS-ready ERA5 file path(s), keyed by forcing field",
++        ),
++        InputFileParam(
++            "era5_mesh_filepath",
++            comment="ESMF mesh describing the ERA5 files' horizontal grid",
++        ),
++        InputValueParam("era5_variable_names", comment="Variables in the ERA5 files"),
++        InputValueParam("era5_atmosphere_mode", comment="full or wind_pressure"),
++        InputValueParam("date_range", comment="Forcing start and end dates"),
++        InputValueParam("case_cesmroot", comment="CESM root directory"),
++    ]
++    output_params = [
++        ConfigOutputParam(
++            "datm_streams",
++            comment="ERA5 overrides applied to the JRA atmosphere streams",
++        )
++    ]
++
++    def __init__(
++        self,
++        era5_atmosphere_files,
++        era5_mesh_filepath,
++        date_range,
++        case_cesmroot,
++        era5_variable_names=None,
++        era5_atmosphere_mode="full",
++    ):
++        if era5_atmosphere_mode not in self._MODE_FIELDS:
++            raise ValueError("era5_atmosphere_mode must be 'full' or 'wind_pressure'")
++        if not isinstance(era5_atmosphere_files, dict):
++            raise TypeError("era5_atmosphere_files must be a dict")
++
++        # Normalize nested Paths before BaseConfigurator serializes config.json.
++        files = {
++            key: self._paths(value) for key, value in era5_atmosphere_files.items()
++        }
++        dates = [
++            (
++                value.strftime("%Y-%m-%d %H:%M:%S")
++                if hasattr(value, "strftime")
++                else str(value)
++            )
++            for value in date_range
++        ]
++        if len(dates) != 2:
++            raise ValueError("date_range must contain a start and end date")
++        variable_names = {key: spec[2] for key, spec in self._FIELDS.items()}
++        if era5_variable_names is not None:
++            variable_names.update(era5_variable_names)
++        super().__init__(
++            era5_atmosphere_files=files,
++            era5_mesh_filepath=era5_mesh_filepath,
++            era5_variable_names=variable_names,
++            era5_atmosphere_mode=era5_atmosphere_mode,
++            date_range=dates,
++            case_cesmroot=case_cesmroot,
++        )
++
++    @staticmethod
++    def _paths(value):
++        if isinstance(value, (str, Path)):
++            return [str(value)]
++        if isinstance(value, (list, tuple)):
++            return [str(path) for path in value]
++        raise TypeError("ERA5 file entries must be a path or a list of paths")
++
++    def _validate_files(self):
++        files = self.get_input_param("era5_atmosphere_files")
++        mode = self.get_input_param("era5_atmosphere_mode")
++        required = self._MODE_FIELDS[mode]
++        missing_keys = set(required) - set(files)
++        if missing_keys:
++            raise ValueError(
++                f"era5_atmosphere_files for {mode} mode is missing: "
++                + ", ".join(sorted(missing_keys))
++            )
++
++        unknown_keys = set(files) - set(self._FIELDS)
++        if unknown_keys:
++            raise ValueError(
++                "Unknown ERA5 atmosphere field key(s): "
++                + ", ".join(sorted(unknown_keys))
++            )
++
++        normalized = {key: self._paths(files[key]) for key in required}
++        missing_paths = [
++            path
++            for paths in normalized.values()
++            for path in paths
++            if not Path(path).is_file()
++        ]
++        mesh = str(self.get_input_param("era5_mesh_filepath"))
++        if not Path(mesh).is_file():
++            missing_paths.append(mesh)
++        if missing_paths:
++            raise FileNotFoundError(
++                "ERA5 forcing input(s) not found: " + ", ".join(missing_paths)
++            )
++        return normalized, mesh
++
++    def configure(self):
++        files, mesh = self._validate_files()
++        variable_names = self.get_input_param("era5_variable_names")
++        unknown_variables = set(variable_names) - set(self._FIELDS)
++        if unknown_variables:
++            raise ValueError(
++                "Unknown ERA5 variable-name key(s): "
++                + ", ".join(sorted(unknown_variables))
++            )
++
++        case = getattr(getattr(self, "registry", None), "case", None)
++        cime_case = getattr(case, "_cime_case", None)
++        if cime_case is None:
++            raise RuntimeError(
++                "ERA5 atmosphere configuration requires a live CrocoDash Case"
++            )
++        mode = cime_case.get_value("DATM_MODE")
++        if "JRA" not in str(mode):
++            raise ValueError(
++                f"ERA5 atmosphere requires a JRA DATM mode; case uses {mode!r}"
++            )
++        stream_names = cdeps_streams.stream_names(
++            self.get_input_param("case_cesmroot"), "datm", mode
++        )
++
++        dates = self.get_input_param("date_range")
++        year_first = int(dates[0][:4])
++        year_last = int(dates[-1][:4])
++        streams = {}
++        pairs = []
++        forcing_mode = self.get_input_param("era5_atmosphere_mode")
++        for key in self._MODE_FIELDS[forcing_mode]:
++            suffix, coupler_name, _ = self._FIELDS[key]
++            matches = [name for name in stream_names if name.endswith(suffix)]
++            if len(matches) != 1:
++                raise ValueError(
++                    f"Expected one {mode} stream ending in {suffix}, found {matches}"
++                )
++            stream = matches[0]
++            mods = {
++                "datafiles": files[key],
++                "meshfile": mesh,
++                "datavars": f"{variable_names[key]} {coupler_name}",
++                "year_first": year_first,
++                "year_last": year_last,
++                "year_align": year_first,
++                "taxmode": "limit",
++                # JRA SWDN has a -5400 s offset and coszen interpolation.
++                # ERA5 rate fields are timestamped hourly, matching the stock
++                # ERA5 stream's zero offset and linear interpolation.
++                "offset": 0,
++                "tintalgo": "linear",
++            }
++            streams[stream] = mods
++            for option, value in mods.items():
++                if option == "datafiles":
++                    value = ",".join(value)
++                pairs.append((f"{stream}:{option}", value))
++
++        user_nl_blocks.write(
++            self.name,
++            "datm_streams",
++            [
++                (
++                    f"Use ERA5 {forcing_mode} atmosphere forcing through the JRA data mode",
++                    pairs,
++                )
++            ],
++        )
++        self.set_output_param(
++            "datm_streams",
++            {
++                "status": "configured",
++                "datm_mode": mode,
++                "era5_mode": forcing_mode,
++                "streams": streams,
++            },
++        )
++        super().configure()
+diff --git a/CrocoDash/raw_data_access/datasets/era5_atmos.py b/CrocoDash/raw_data_access/datasets/era5_atmos.py
+new file mode 100644
+index 0000000..5139873
+--- /dev/null
++++ b/CrocoDash/raw_data_access/datasets/era5_atmos.py
+@@ -0,0 +1,400 @@
++"""Prepare NCAR RDA ERA5 surface fields for the CDEPS JRA atmosphere interface.
++
++ERA5 atmospheric-forcing extension by Faezeh Maghsoodifar, 2026.
++Built for regional MOM6/CrocoDash workflows on NCAR Derecho and Casper.
++
++This is deliberately separate from :mod:`CrocoDash.raw_data_access.datasets.era5`,
++which provides wave spectra for WW3.  The functions here prepare atmospheric
++state and flux fields for MOM6/CICE coupling.
++
++NCAR RDA ds633.0 stores instantaneous analyses on a ``time`` axis, but stores
++mean precipitation/radiation rates on ``forecast_initial_time`` and
++``forecast_hour`` axes.  :func:`prepare_rda_era5_atmosphere` flattens the latter
++onto valid hourly time, derives 2 m specific humidity from dew point and mean
++sea-level pressure, and writes the eight fields expected by
++``ERA5AtmosphereConfigurator``.
++"""
++
++from __future__ import annotations
++
++import argparse
++import shutil
++import subprocess
++from pathlib import Path
++
++import numpy as np
++import pandas as pd
++import xarray as xr
++
++
++DEFAULT_RDA_ROOT = Path("/glade/campaign/collections/rda/data/d633000")
++
++# key: (RDA collection, parameter code, NetCDF variable)
++RDA_FIELDS = {
++    "u10": ("e5.oper.an.sfc", "128_165_10u", "VAR_10U"),
++    "v10": ("e5.oper.an.sfc", "128_166_10v", "VAR_10V"),
++    "t2m": ("e5.oper.an.sfc", "128_167_2t", "VAR_2T"),
++    "d2m": ("e5.oper.an.sfc", "128_168_2d", "VAR_2D"),
++    "msl": ("e5.oper.an.sfc", "128_151_msl", "MSL"),
++    "swdn": ("e5.oper.fc.sfc.meanflux", "235_035_msdwswrf", "MSDWSWRF"),
++    "lwdn": ("e5.oper.fc.sfc.meanflux", "235_036_msdwlwrf", "MSDWLWRF"),
++    "precip": ("e5.oper.fc.sfc.meanflux", "235_055_mtpr", "MTPR"),
++}
++
++OUTPUT_FIELDS = ("precip", "lwdn", "swdn", "q2m", "msl", "t2m", "u10", "v10")
++
++
++def _month_strings(start, end):
++    """Months needed for a window, including the prior day for forecast rates."""
++    first = pd.Timestamp(start).floor("D") - pd.Timedelta(days=1)
++    last = pd.Timestamp(end).ceil("D")
++    return pd.period_range(first, last, freq="M").strftime("%Y%m").tolist()
++
++
++def find_rda_era5_files(start, end, rda_root=DEFAULT_RDA_ROOT):
++    """Return the ds633.0 files needed for ``start`` through ``end``.
++
++    The returned mapping can be inspected before any multi-gigabyte data are
++    opened.  Missing fields raise with the exact directory and parameter code.
++    """
++    root = Path(rda_root)
++    months = _month_strings(start, end)
++    result = {}
++    for key, (collection, code, _variable) in RDA_FIELDS.items():
++        paths = []
++        for month in months:
++            directory = root / collection / month
++            paths.extend(sorted(directory.glob(f"*{code}*.nc")))
++        if not paths:
++            raise FileNotFoundError(
++                f"No ERA5 {key} ({code}) files under {root / collection} "
++                f"for months {months}"
++            )
++        result[key] = paths
++    return result
++
++
++def specific_humidity_from_dewpoint(dewpoint_k, pressure_pa):
++    """Specific humidity (kg/kg) from dew point (K) and pressure (Pa).
++
++    Uses the Buck saturation-vapour-pressure expression over water.  Mean
++    sea-level pressure is used because the JRA CDEPS data mode likewise copies
++    ``Sa_pslv`` into ``Sa_pbot`` for ocean forcing.
++    """
++    dewpoint_c = dewpoint_k - 273.15
++    vapour_pressure = 611.21 * np.exp(
++        (18.678 - dewpoint_c / 234.5) * (dewpoint_c / (257.14 + dewpoint_c))
++    )
++    epsilon = 0.622
++    return epsilon * vapour_pressure / (pressure_pa - (1.0 - epsilon) * vapour_pressure)
++
++
++def _coordinate_name(obj, candidates):
++    for name in candidates:
++        if name in obj.coords or name in obj.dims:
++            return name
++    raise ValueError(f"None of {candidates} found in {list(obj.coords)}")
++
++
++def _data_variable(dataset, preferred):
++    if preferred in dataset.data_vars:
++        return preferred
++    candidates = [
++        name
++        for name, data in dataset.data_vars.items()
++        if "latitude" in data.dims or "lat" in data.dims
++    ]
++    if len(candidates) != 1:
++        raise ValueError(
++            f"Expected variable {preferred!r}; spatial variables are {candidates}"
++        )
++    return candidates[0]
++
++
++def _rename_horizontal(data):
++    lat = _coordinate_name(data, ("latitude", "lat"))
++    lon = _coordinate_name(data, ("longitude", "lon"))
++    rename = {}
++    if lat != "lat":
++        rename[lat] = "lat"
++    if lon != "lon":
++        rename[lon] = "lon"
++    return data.rename(rename).sortby("lat").sortby("lon")
++
++
++def _open_analysis(paths, variable, start, end, chunks):
++    chunks = {
++        key: value
++        for key, value in chunks.items()
++        if key in ("time", "valid_time", "latitude", "longitude", "lat", "lon")
++    }
++    dataset = xr.open_mfdataset(
++        [str(path) for path in paths], combine="by_coords", chunks=chunks
++    )
++    name = _data_variable(dataset, variable)
++    data = _rename_horizontal(dataset[name])
++    time = _coordinate_name(data, ("time", "valid_time"))
++    if time != "time":
++        data = data.rename({time: "time"})
++    return data.sel(time=slice(start, end)).transpose("time", "lat", "lon")
++
++
++def _open_mean_rate(paths, variable, start, end, chunks):
++    chunks = {
++        key: value
++        for key, value in chunks.items()
++        if key
++        in (
++            "forecast_initial_time",
++            "forecast_reference_time",
++            "forecast_hour",
++            "step",
++            "latitude",
++            "longitude",
++            "lat",
++            "lon",
++        )
++    }
++    dataset = xr.open_mfdataset(
++        [str(path) for path in paths], combine="by_coords", chunks=chunks
++    )
++    name = _data_variable(dataset, variable)
++    data = _rename_horizontal(dataset[name])
++    initial = _coordinate_name(
++        data, ("forecast_initial_time", "forecast_reference_time")
++    )
++    hour = _coordinate_name(data, ("forecast_hour", "step"))
++
++    initial_values = pd.to_datetime(dataset[initial].values).values.astype(
++        "datetime64[ns]"
++    )
++    hour_values = np.asarray(dataset[hour].values)
++    if np.issubdtype(hour_values.dtype, np.timedelta64):
++        lead = hour_values.astype("timedelta64[ns]")
++    else:
++        lead = (hour_values.astype("int64") * 3600).astype("timedelta64[s]")
++    valid = initial_values[:, None] + lead[None, :]
++
++    data = data.stack(_sample=(initial, hour), create_index=False)
++    data = data.assign_coords(time=("_sample", valid.reshape(-1)))
++    data = data.swap_dims({"_sample": "time"}).drop_vars("_sample", errors="ignore")
++    data = data.sortby("time").sel(time=slice(start, end))
++    return data.transpose("time", "lat", "lon")
++
++
++def _check_rate_units(data, field):
++    units = str(data.attrs.get("units", "")).lower().replace(" ", "")
++    if field in ("swdn", "lwdn") and not (
++        "wm**-2" in units or "wm-2" in units or "w/m2" in units
++    ):
++        raise ValueError(f"ERA5 {field} must be a mean W m-2 flux; got {units!r}")
++    if field == "precip" and not (
++        "kgm**-2s**-1" in units or "kgm-2s-1" in units or "kg/m2/s" in units
++    ):
++        raise ValueError(f"ERA5 precip must be a mean kg m-2 s-1 rate; got {units!r}")
++
++
++def prepare_rda_era5_atmosphere(
++    start,
++    end,
++    output_file,
++    rda_root=DEFAULT_RDA_ROOT,
++    chunks=None,
++):
++    """Create one CDEPS-ready NetCDF file containing all eight ERA5 fields."""
++    start = pd.Timestamp(start)
++    end = pd.Timestamp(end)
++    if end <= start:
++        raise ValueError("end must be later than start")
++    output_file = Path(output_file)
++    output_file.parent.mkdir(parents=True, exist_ok=True)
++    chunks = chunks or {"time": 24, "forecast_initial_time": 2}
++    files = find_rda_era5_files(start, end, rda_root)
++
++    state = {}
++    for field in ("u10", "v10", "t2m", "d2m", "msl"):
++        variable = RDA_FIELDS[field][2]
++        state[field] = _open_analysis(files[field], variable, start, end, chunks)
++
++    rates = {}
++    for field in ("swdn", "lwdn", "precip"):
++        variable = RDA_FIELDS[field][2]
++        rates[field] = _open_mean_rate(files[field], variable, start, end, chunks)
++        _check_rate_units(rates[field], field)
++
++    q2m = specific_humidity_from_dewpoint(state["d2m"], state["msl"])
++    q2m.name = "q2m"
++    q2m.attrs.update(
++        long_name="2 metre specific humidity derived from ERA5 dew point",
++        units="kg kg-1",
++    )
++
++    output = xr.Dataset(
++        {
++            "u10": state["u10"].astype("float32"),
++            "v10": state["v10"].astype("float32"),
++            "t2m": state["t2m"].astype("float32"),
++            "q2m": q2m.astype("float32"),
++            "msl": state["msl"].astype("float32"),
++            "swdn": rates["swdn"].astype("float32"),
++            "lwdn": rates["lwdn"].astype("float32"),
++            "precip": rates["precip"].astype("float32"),
++        },
++        attrs={
++            "title": "ERA5 atmospheric forcing prepared for CDEPS DATM%JRA",
++            "source": "NCAR RDA ds633.0",
++        },
++    )
++    output["u10"].attrs.update(units="m s-1")
++    output["v10"].attrs.update(units="m s-1")
++    output["t2m"].attrs.update(units="K")
++    output["msl"].attrs.update(units="Pa")
++    output["swdn"].attrs.update(units="W m-2")
++    output["lwdn"].attrs.update(units="W m-2")
++    output["precip"].attrs.update(units="kg m-2 s-1")
++
++    encoding = {
++        field: {
++            "dtype": "float32",
++            "zlib": True,
++            "complevel": 1,
++            "shuffle": True,
++            "_FillValue": np.float32(9.96921e36),
++        }
++        for field in OUTPUT_FIELDS
++    }
++    encoding.update(
++        {
++            "time": {
++                "dtype": "float64",
++                "units": f"hours since {start:%Y-%m-%d 00:00:00}",
++                "calendar": "gregorian",
++            },
++            "lat": {"_FillValue": None},
++            "lon": {"_FillValue": None},
++        }
++    )
++    output.to_netcdf(output_file, format="NETCDF4", encoding=encoding)
++    checked = validate_prepared_era5(output_file, start, end)
++    checked.close()
++    output.close()
++    return {field: str(output_file) for field in OUTPUT_FIELDS}
++
++
++def validate_prepared_era5(path, start=None, end=None):
++    """Validate fields, dimensions, hourly time, and broad physical ranges."""
++    dataset = xr.open_dataset(path)
++    missing = set(OUTPUT_FIELDS) - set(dataset.data_vars)
++    if missing:
++        raise ValueError(f"Prepared ERA5 file is missing {sorted(missing)}")
++    for field in OUTPUT_FIELDS:
++        if dataset[field].dims != ("time", "lat", "lon"):
++            raise ValueError(f"{field} has dimensions {dataset[field].dims}")
++    times = pd.DatetimeIndex(dataset.time.values)
++    if not times.is_monotonic_increasing or times.has_duplicates:
++        raise ValueError("ERA5 time must be increasing and unique")
++    if len(times) > 1 and not np.all(np.diff(times.values) == np.timedelta64(1, "h")):
++        raise ValueError("ERA5 forcing must be continuous hourly data")
++    if start is not None and times[0] > pd.Timestamp(start):
++        raise ValueError(f"ERA5 starts at {times[0]}, after requested {start}")
++    if end is not None and times[-1] < pd.Timestamp(end):
++        raise ValueError(f"ERA5 ends at {times[-1]}, before requested {end}")
++
++    ranges = {
++        "q2m": (0.0, 0.06),
++        "msl": (80000.0, 110000.0),
++        "t2m": (180.0, 340.0),
++        "precip": (0.0, 0.1),
++        "swdn": (-1.0, 1600.0),
++        "lwdn": (0.0, 800.0),
++    }
++    for field, (low, high) in ranges.items():
++        minimum = float(dataset[field].min())
++        maximum = float(dataset[field].max())
++        if minimum < low or maximum > high:
++            raise ValueError(
++                f"{field} range {minimum:g}..{maximum:g} outside {low:g}..{high:g}"
++            )
++    return dataset
++
++
++def write_scrip_grid(lon, lat, path):
++    """Write a regular-lat/lon SCRIP grid for ``ESMF_Scrip2Unstruct``."""
++    lon = np.asarray(lon, dtype="float64")
++    lat = np.asarray(lat, dtype="float64")
++    if lon.ndim != 1 or lat.ndim != 1:
++        raise ValueError("ERA5 lon and lat must be one-dimensional")
++    dlon = float(np.median(np.diff(lon)))
++    dlat = float(np.median(np.diff(lat)))
++    lon_center, lat_center = np.meshgrid(lon, lat)
++    west = lon_center - dlon / 2.0
++    east = lon_center + dlon / 2.0
++    south = np.maximum(lat_center - dlat / 2.0, -90.0)
++    north = np.minimum(lat_center + dlat / 2.0, 90.0)
++    corner_lon = np.stack((west, east, east, west), axis=-1)
++    corner_lat = np.stack((south, south, north, north), axis=-1)
++    ny, nx = lat.size, lon.size
++    scrip = xr.Dataset(
++        {
++            "grid_dims": (("grid_rank",), np.asarray([nx, ny], dtype="int32")),
++            "grid_center_lon": (("grid_size",), lon_center.reshape(-1)),
++            "grid_center_lat": (("grid_size",), lat_center.reshape(-1)),
++            "grid_imask": (("grid_size",), np.ones(nx * ny, dtype="int32")),
++            "grid_corner_lon": (
++                ("grid_size", "grid_corners"),
++                corner_lon.reshape(-1, 4),
++            ),
++            "grid_corner_lat": (
++                ("grid_size", "grid_corners"),
++                corner_lat.reshape(-1, 4),
++            ),
++        }
++    )
++    for name in ("grid_center_lon", "grid_corner_lon"):
++        scrip[name].attrs["units"] = "degrees"
++    for name in ("grid_center_lat", "grid_corner_lat"):
++        scrip[name].attrs["units"] = "degrees"
++    path = Path(path)
++    path.parent.mkdir(parents=True, exist_ok=True)
++    scrip.to_netcdf(path, format="NETCDF4")
++    return path
++
++
++def make_esmf_mesh(forcing_file, scrip_file, mesh_file, converter=None):
++    """Create an ESMF mesh using NCAR's supported SCRIP converter."""
++    dataset = xr.open_dataset(forcing_file)
++    write_scrip_grid(dataset.lon.values, dataset.lat.values, scrip_file)
++    dataset.close()
++    executable = converter or shutil.which("ESMF_Scrip2Unstruct")
++    if executable is None:
++        raise FileNotFoundError(
++            "ESMF_Scrip2Unstruct is not on PATH. On Casper/Derecho, load the "
++            "same modules as the CrocoDash kernel or pass --converter PATH."
++        )
++    subprocess.run([str(executable), str(scrip_file), str(mesh_file), "0"], check=True)
++    return Path(mesh_file)
++
++
++def main(argv=None):
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument("--start", required=True)
++    parser.add_argument("--end", required=True)
++    parser.add_argument("--output", required=True, type=Path)
++    parser.add_argument("--scrip", required=True, type=Path)
++    parser.add_argument("--mesh", required=True, type=Path)
++    parser.add_argument("--rda-root", type=Path, default=DEFAULT_RDA_ROOT)
++    parser.add_argument("--converter")
++    args = parser.parse_args(argv)
++
++    files = prepare_rda_era5_atmosphere(
++        args.start, args.end, args.output, rda_root=args.rda_root
++    )
++    make_esmf_mesh(args.output, args.scrip, args.mesh, converter=args.converter)
++    print("Prepared fields:")
++    for key, value in files.items():
++        print(f"  {key}: {value}")
++    print(f"ESMF mesh: {args.mesh}")
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/NOTICE b/NOTICE
+new file mode 100644
+index 0000000..57fbd47
+--- /dev/null
++++ b/NOTICE
+@@ -0,0 +1,18 @@
++CrocoDash ERA5 Atmospheric-Forcing Extension
++
++ERA5 integration, preprocessing workflow, tests, and NCAR application materials:
++Copyright 2026 Faezeh Maghsoodifar
++The University of Alabama
++fmaghsoodifar@crimson.ua.edu
++
++This extension modifies CrocoDash, originally developed by the CROCODILE-CESM
++community and distributed under the Apache License, Version 2.0. Original
++copyright and attribution notices remain in the upstream project.
++
++CrocoDash project: https://github.com/CROCODILE-CESM/CrocoDash
++CrocoDash documentation: https://crocodile-cesm.github.io/CrocoDash/
++Upstream software DOI: https://doi.org/10.5281/zenodo.17342301
++
++ERA5 data are produced by ECMWF and are not redistributed with this software.
++NCAR, CESM, CDEPS, CMEPS, MOM6, ERA5, ECMWF, GEBCO, GLORYS, and TPXO names
++and trademarks belong to their respective owners.
+diff --git a/docs/source/for_users/3a_configure_forcings.md b/docs/source/for_users/3a_configure_forcings.md
+index 3af8577..6240097 100644
+--- a/docs/source/for_users/3a_configure_forcings.md
++++ b/docs/source/for_users/3a_configure_forcings.md
+@@ -1,5 +1,9 @@
+ # 3a. Configure Forcings (case.configure_forcings)
+ 
++> **Modification notice:** ERA5 atmospheric-forcing documentation was added
++> by Faezeh Maghsoodifar in 2026. The remaining material derives from the
++> upstream CrocoDash documentation distributed under Apache-2.0.
++
+ Forcing configuration handles setup of all forcing and boundary conditions for your regional MOM6 case, including tides, biogeochemistry, runoff, initial conditions, and more.
+ 
+ :::{admonition} Need to find a dataset?
+@@ -64,6 +68,60 @@ case.configure_forcings(
+ )
+ ```
+ 
++### ERA5 atmospheric forcing for MOM6/CICE
++
++For a regional ocean case using `CR_JRA` (or another `DATM%JRA` compset),
++CrocoDash can replace all eight JRA atmosphere streams with prepared ERA5
++fields.  `DATM%JRA` remains the CDEPS field interface, but no JRA atmospheric
++data are used in `full` mode.
++
++On NCAR systems, prepare the hourly RDA ds633.0 data and its ESMF mesh first:
++
++```bash
++python -m CrocoDash.raw_data_access.datasets.era5_atmos \
++  --start 2008-08-29T00:00:00 \
++  --end   2008-09-21T00:00:00 \
++  --output /glade/work/$USER/crocodile2026/era5_forcing/ike2008/era5_atmos_ike2008.nc \
++  --scrip  /glade/work/$USER/crocodile2026/era5_forcing/ike2008/era5_025_scrip.nc \
++  --mesh   /glade/work/$USER/crocodile2026/era5_forcing/ike2008/era5_025_ESMFmesh.nc
++```
++
++The atmospheric file contains `u10`, `v10`, `t2m`, `q2m`, `msl`, `precip`,
++`swdn`, and `lwdn`.  The helper uses ERA5 *mean-rate* products for
++precipitation and radiation; raw accumulated fields are not CDEPS-ready.
++Pass the resulting file and mesh in the same call that configures the rest of
++the case:
++
++```python
++from pathlib import Path
++
++force_dir = Path("/glade/work/faezehmaghso/crocodile2026/era5_forcing/ike2008")
++era5_file = force_dir / "era5_atmos_ike2008.nc"
++
++case.configure_forcings(
++    date_range=["2008-08-30 00:00:00", "2008-09-20 00:00:00"],
++    product_name="GLORYS",
++    function_name="get_glorys_data_from_rda",
++    # ... tides and other ocean inputs ...
++    era5_atmosphere_files={
++        field: era5_file
++        for field in (
++            "precip", "lwdn", "swdn", "q2m",
++            "msl", "t2m", "u10", "v10",
++        )
++    },
++    era5_mesh_filepath=force_dir / "era5_025_ESMFmesh.nc",
++    era5_atmosphere_mode="full",
++)
++```
++
++For the narrower wind/pressure sensitivity experiment used in the Hurricane
++Ike workshop notebook, set `era5_atmosphere_mode="wind_pressure"` and provide
++only `u10`, `v10`, and `msl`.  In that mode the other five streams remain JRA.
++After `case.setup --reset`, run `preview_namelists` and verify the generated
++`datm.streams.xml` references the ERA5 file in eight data-file entries before
++submitting the case.
++
+ ## How to Check What's Required
+ 
+ Before calling `configure_forcings()`, you can check what configuration options are required for your compset. It will also be printed on case initialization:
+diff --git a/tests/forcing/test_atm.py b/tests/forcing/test_atm.py
+index a788dda..25e8096 100644
+--- a/tests/forcing/test_atm.py
++++ b/tests/forcing/test_atm.py
+@@ -1,5 +1,7 @@
+ """Tests for DATM/DROF stream year alignment.
+ 
++ERA5-related test additions by Faezeh Maghsoodifar, 2026.
++
+ These read the real CDEPS stream definitions out of a CESM checkout, so they
+ are gated on GLADE. The datestamp assertions are deliberately exact: they
+ double as a guard on the private CDEPS helpers (`_sub_paths`,
+@@ -11,10 +13,14 @@ than silently emitting file paths that do not exist.
+ import os
+ from unittest.mock import patch
+ 
++import pandas as pd
+ import pytest
+ 
+ from CrocoDash.forcing import cdeps_streams
+-from CrocoDash.forcing.atm import StreamYearConfigurator
++from CrocoDash.forcing.atm import (
++    ERA5AtmosphereConfigurator,
++    StreamYearConfigurator,
++)
+ 
+ INPUTDATA = "/glade/campaign/cesm/cesmdata/inputdata"
+ 
+@@ -225,3 +231,123 @@ def test_serializes_to_json(mock_append, cesmroot):
+     assert restored.get_output_param("datm_streams") == configurator.get_output_param(
+         "datm_streams"
+     )
++
++
++ERA5_STREAMS = [
++    "CORE_IAF_JRA.PREC",
++    "CORE_IAF_JRA.LWDN",
++    "CORE_IAF_JRA.SWDN",
++    "CORE_IAF_JRA.Q_10",
++    "CORE_IAF_JRA.SLP_",
++    "CORE_IAF_JRA.T_10",
++    "CORE_IAF_JRA.U_10",
++    "CORE_IAF_JRA.V_10",
++]
++
++
++def era5_inputs(tmp_path, fields):
++    files = {}
++    for key in fields:
++        path = tmp_path / f"era5_{key}.nc"
++        path.touch()
++        files[key] = path
++    mesh = tmp_path / "era5_mesh.nc"
++    mesh.touch()
++    return files, mesh
++
++
++@pytest.mark.parametrize(
++    "forcing_mode,fields,expected_streams",
++    [
++        ("full", tuple(ERA5AtmosphereConfigurator._FIELDS), ERA5_STREAMS),
++        (
++            "wind_pressure",
++            ("u10", "v10", "msl"),
++            [
++                "CORE_IAF_JRA.U_10",
++                "CORE_IAF_JRA.V_10",
++                "CORE_IAF_JRA.SLP_",
++            ],
++        ),
++    ],
++)
++@patch("CrocoDash.forcing.atm.cdeps_streams.stream_names")
++@patch("CrocoDash.forcing.user_nl_blocks.write")
++def test_era5_atmosphere_overrides_jra_streams(
++    mock_write,
++    mock_stream_names,
++    tmp_path,
++    forcing_mode,
++    fields,
++    expected_streams,
++):
++    mock_stream_names.return_value = ERA5_STREAMS
++    files, mesh = era5_inputs(tmp_path, fields)
++
++    configurator = ERA5AtmosphereConfigurator(
++        era5_atmosphere_files=files,
++        era5_mesh_filepath=mesh,
++        era5_atmosphere_mode=forcing_mode,
++        date_range=pd.to_datetime(["2008-08-30", "2008-09-20"]),
++        case_cesmroot=tmp_path / "CESM",
++    )
++    configurator.registry = FakeRegistry(FakeCimeCase(DATM_MODE="CORE_IAF_JRA"))
++    configurator.configure()
++
++    plan = configurator.get_output_param("datm_streams")
++    assert plan["status"] == "configured"
++    assert plan["era5_mode"] == forcing_mode
++    assert set(plan["streams"]) == set(expected_streams)
++
++    pairs = dict(mock_write.call_args.args[2][0][1])
++    assert pairs["CORE_IAF_JRA.U_10:datavars"] == "u10 Sa_u"
++    assert pairs["CORE_IAF_JRA.V_10:datavars"] == "v10 Sa_v"
++    assert pairs["CORE_IAF_JRA.SLP_:datavars"] == "msl Sa_pslv"
++    assert pairs["CORE_IAF_JRA.U_10:year_first"] == 2008
++    assert pairs["CORE_IAF_JRA.U_10:year_last"] == 2008
++    assert pairs["CORE_IAF_JRA.U_10:year_align"] == 2008
++    assert pairs["CORE_IAF_JRA.U_10:taxmode"] == "limit"
++    assert pairs["CORE_IAF_JRA.U_10:offset"] == 0
++    assert pairs["CORE_IAF_JRA.U_10:tintalgo"] == "linear"
++    assert pairs["CORE_IAF_JRA.U_10:datafiles"] == str(files["u10"])
++    assert pairs["CORE_IAF_JRA.U_10:meshfile"] == str(mesh)
++    if forcing_mode == "full":
++        assert pairs["CORE_IAF_JRA.PREC:datavars"] == "precip Faxa_prec"
++        assert pairs["CORE_IAF_JRA.LWDN:datavars"] == "lwdn Faxa_lwdn"
++        assert pairs["CORE_IAF_JRA.SWDN:datavars"] == "swdn Faxa_swdn"
++        assert pairs["CORE_IAF_JRA.Q_10:datavars"] == "q2m Sa_shum"
++        assert pairs["CORE_IAF_JRA.T_10:datavars"] == "t2m Sa_tbot"
++
++    # Nested Path values are normalized, so configure_forcings can write JSON.
++    import json
++
++    json.dumps(configurator.serialize())
++
++
++def test_era5_atmosphere_full_requires_all_eight_fields(tmp_path):
++    files, mesh = era5_inputs(tmp_path, ("u10", "v10", "msl"))
++    configurator = ERA5AtmosphereConfigurator(
++        era5_atmosphere_files=files,
++        era5_mesh_filepath=mesh,
++        date_range=pd.to_datetime(["2008-08-30", "2008-09-20"]),
++        case_cesmroot=tmp_path / "CESM",
++    )
++    configurator.registry = FakeRegistry(FakeCimeCase(DATM_MODE="CORE_IAF_JRA"))
++
++    with pytest.raises(ValueError, match="lwdn.*precip.*q2m.*swdn.*t2m"):
++        configurator.configure()
++
++
++def test_era5_atmosphere_rejects_non_jra_datm(tmp_path):
++    files, mesh = era5_inputs(tmp_path, ("u10", "v10", "msl"))
++    configurator = ERA5AtmosphereConfigurator(
++        era5_atmosphere_files=files,
++        era5_mesh_filepath=mesh,
++        era5_atmosphere_mode="wind_pressure",
++        date_range=pd.to_datetime(["2008-08-30", "2008-09-20"]),
++        case_cesmroot=tmp_path / "CESM",
++    )
++    configurator.registry = FakeRegistry(FakeCimeCase(DATM_MODE="ERA5"))
++
++    with pytest.raises(ValueError, match="requires a JRA DATM mode"):
++        configurator.configure()
+diff --git a/tests/forcing/test_configurators.py b/tests/forcing/test_configurators.py
+index 16e3196..66cba4e 100644
+--- a/tests/forcing/test_configurators.py
++++ b/tests/forcing/test_configurators.py
+@@ -1,3 +1,8 @@
++"""CrocoDash configurator tests.
++
++ERA5-related test additions by Faezeh Maghsoodifar, 2026.
++"""
++
+ from CrocoDash.forcing.base import *
+ from ProConPy.config_var import cvars
+ from CrocoDash.raw_data_access.base import NOLEAP
+@@ -63,6 +68,24 @@ def test_all_configurators_smoke(fake_param_case, fake_cime, fake_forcing_produc
+         for a in args:
+             if a == "date_range":
+                 ctor_args[a] = dummy_date_range
++            elif a == "era5_atmosphere_files":
++                ctor_args[a] = {
++                    key: dummy_path
++                    for key in (
++                        "precip",
++                        "lwdn",
++                        "swdn",
++                        "q2m",
++                        "msl",
++                        "t2m",
++                        "u10",
++                        "v10",
++                    )
++                }
++            elif a == "era5_variable_names":
++                ctor_args[a] = None
++            elif a == "era5_atmosphere_mode":
++                ctor_args[a] = "full"
+             elif a == "boundaries":
+                 ctor_args[a] = ["south", "north", "west", "east"]
+             elif a == "product_name":
+@@ -88,7 +111,12 @@ def test_all_configurators_smoke(fake_param_case, fake_cime, fake_forcing_produc
+         instance = config_class(**ctor_args)
+ 
+         # Smoke test
+-        if hasattr(instance, "output_params") and any(
++        if config_class.name == "ERA5Atmosphere":
++            # This configurator discovers the active JRA stream names from the
++            # live CIME case.  Its dedicated tests provide that case context.
++            with pytest.raises(RuntimeError, match="live CrocoDash Case"):
++                instance.configure()
++        elif hasattr(instance, "output_params") and any(
+             isinstance(x, XMLConfigParam) for x in instance.output_params
+         ):
+             with pytest.raises(RuntimeError):
+diff --git a/tests/raw_data_access/test_era5_atmos.py b/tests/raw_data_access/test_era5_atmos.py
+new file mode 100644
+index 0000000..a1a543a
+--- /dev/null
++++ b/tests/raw_data_access/test_era5_atmos.py
+@@ -0,0 +1,99 @@
++"""Small, offline tests for ERA5 atmospheric preprocessing.
++
++Tests by Faezeh Maghsoodifar, 2026.
++"""
++
++import numpy as np
++import pandas as pd
++import pytest
++import xarray as xr
++
++from CrocoDash.raw_data_access.datasets import era5_atmos
++
++
++def test_specific_humidity_from_dewpoint():
++    q = era5_atmos.specific_humidity_from_dewpoint(
++        np.asarray([293.15]), np.asarray([101325.0])
++    )
++    assert q[0] == pytest.approx(0.01448, rel=2.0e-3)
++
++
++def test_prepare_small_synthetic_archive(tmp_path):
++    root = tmp_path / "d633000"
++    month = "200808"
++    lat = np.asarray([10.0, 11.0])
++    lon = np.asarray([20.0, 21.0])
++    time = pd.date_range("2008-08-02", periods=6, freq="h")
++    values = {"u10": 5.0, "v10": 2.0, "t2m": 300.0, "d2m": 295.0, "msl": 100000.0}
++    units = {"u10": "m s**-1", "v10": "m s**-1", "t2m": "K", "d2m": "K", "msl": "Pa"}
++
++    for key, value in values.items():
++        collection, code, variable = era5_atmos.RDA_FIELDS[key]
++        folder = root / collection / month
++        folder.mkdir(parents=True, exist_ok=True)
++        data = np.full((6, 2, 2), value, dtype="float32")
++        dataset = xr.Dataset(
++            {variable: (("time", "latitude", "longitude"), data)},
++            coords={"time": time, "latitude": lat, "longitude": lon},
++        )
++        dataset[variable].attrs["units"] = units[key]
++        dataset.to_netcdf(folder / f"test.{code}.nc")
++
++    initial = pd.DatetimeIndex(["2008-08-02T00:00:00"])
++    hour = np.arange(6)
++    rate_fields = (
++        ("swdn", 500.0, "W m**-2"),
++        ("lwdn", 350.0, "W m**-2"),
++        ("precip", 0.001, "kg m**-2 s**-1"),
++    )
++    for key, value, unit in rate_fields:
++        collection, code, variable = era5_atmos.RDA_FIELDS[key]
++        folder = root / collection / month
++        folder.mkdir(parents=True, exist_ok=True)
++        data = np.full((1, 6, 2, 2), value, dtype="float32")
++        dataset = xr.Dataset(
++            {
++                variable: (
++                    (
++                        "forecast_initial_time",
++                        "forecast_hour",
++                        "latitude",
++                        "longitude",
++                    ),
++                    data,
++                )
++            },
++            coords={
++                "forecast_initial_time": initial,
++                "forecast_hour": hour,
++                "latitude": lat,
++                "longitude": lon,
++            },
++        )
++        dataset[variable].attrs["units"] = unit
++        dataset.to_netcdf(folder / f"test.{code}.nc")
++
++    output = tmp_path / "era5.nc"
++    files = era5_atmos.prepare_rda_era5_atmosphere(
++        "2008-08-02T00",
++        "2008-08-02T05",
++        output,
++        rda_root=root,
++        chunks={"time": 2, "forecast_initial_time": 1},
++    )
++    result = era5_atmos.validate_prepared_era5(output, "2008-08-02T00", "2008-08-02T05")
++    assert set(files) == set(era5_atmos.OUTPUT_FIELDS)
++    assert result.sizes == {"time": 6, "lat": 2, "lon": 2}
++    assert float(result.q2m.mean()) == pytest.approx(0.01646, rel=2.0e-3)
++    result.close()
++
++
++def test_write_scrip_grid(tmp_path):
++    path = era5_atmos.write_scrip_grid(
++        lon=np.asarray([0.0, 1.0]),
++        lat=np.asarray([-1.0, 0.0, 1.0]),
++        path=tmp_path / "grid_scrip.nc",
++    )
++    with xr.open_dataset(path) as grid:
++        assert grid.sizes == {"grid_rank": 2, "grid_size": 6, "grid_corners": 4}
++        assert np.all(grid.grid_imask == 1)
+-- 
+2.53.0.windows.3
+

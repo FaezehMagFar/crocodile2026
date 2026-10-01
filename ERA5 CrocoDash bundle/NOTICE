@@ -1,0 +1,19 @@
+ERA5 Atmospheric Forcing Extension for CrocoDash and Regional MOM6
+
+Copyright 2026 Faezeh Maghsoodifar
+The University of Alabama
+fmaghsoodifar@crimson.ua.edu
+
+Faezeh Maghsoodifar is the author of the ERA5 integration, preprocessing
+workflow, NCAR runbook, validation materials, and Hurricane Ike application
+contained in this repository.
+
+This work modifies and extends CrocoDash, developed by the CROCODILE-CESM
+community and distributed under Apache-2.0:
+https://github.com/CROCODILE-CESM/CrocoDash
+https://doi.org/10.5281/zenodo.17342301
+
+ERA5 is produced by ECMWF. ERA5 data are accessed through the NCAR Research
+Data Archive and are not redistributed. GEBCO, GLORYS, and TPXO data are also
+not redistributed. All project names and trademarks belong to their
+respective owners.

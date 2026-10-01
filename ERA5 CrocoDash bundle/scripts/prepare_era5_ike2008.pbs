@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# Author: Faezeh Maghsoodifar, The University of Alabama, 2026
+# Hurricane Ike example. Edit the PBS account and queue before submission.
+
+#PBS -N era5_atmos_ike
+#PBS -A EDIT_NCAR_PROJECT
+#PBS -q EDIT_QUEUE
+#PBS -l select=1:ncpus=4:mem=80GB
+#PBS -l walltime=02:00:00
+#PBS -j oe
+
+set -euo pipefail
+
+workspace=${CROCODILE_WORKSPACE:-/glade/work/$USER/crocodile2026}
+force_dir="$workspace/era5_forcing/ike2008"
+mkdir -p "$force_dir"
+
+python -m CrocoDash.raw_data_access.datasets.era5_atmos \
+  --start 2008-08-29T00:00:00 \
+  --end 2008-09-21T00:00:00 \
+  --output "$force_dir/era5_atmos_ike2008.nc" \
+  --scrip "$force_dir/era5_025_scrip.nc" \
+  --mesh "$force_dir/era5_025_ESMFmesh.nc"
+
+ls -lh "$force_dir"

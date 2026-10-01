@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# Author: Faezeh Maghsoodifar, The University of Alabama, 2026
+# Reusable NCAR PBS template for full ERA5 atmospheric preprocessing.
+
+#PBS -N era5_atmos
+#PBS -A EDIT_NCAR_PROJECT
+#PBS -q EDIT_QUEUE
+#PBS -l select=1:ncpus=4:mem=80GB
+#PBS -l walltime=02:00:00
+#PBS -j oe
+
+set -euo pipefail
+
+workspace=${CROCODILE_WORKSPACE:-/glade/work/$USER/crocodile2026}
+event_name=${ERA5_EVENT_NAME:-EDIT_EVENT_NAME}
+start_time=${ERA5_START:-EDIT_START_YYYY-MM-DDTHH:MM:SS}
+end_time=${ERA5_END:-EDIT_END_YYYY-MM-DDTHH:MM:SS}
+force_dir=${ERA5_FORCE_DIR:-$workspace/era5_forcing/$event_name}
+
+if [[ "$event_name" == EDIT_* || "$start_time" == EDIT_* || "$end_time" == EDIT_* ]]; then
+  echo "Edit the event and dates, or export ERA5_EVENT_NAME, ERA5_START, and ERA5_END before qsub -V." >&2
+  exit 2
+fi
+
+mkdir -p "$force_dir"
+
+python -m CrocoDash.raw_data_access.datasets.era5_atmos \
+  --start "$start_time" \
+  --end "$end_time" \
+  --output "$force_dir/era5_atmos_${event_name}.nc" \
+  --scrip "$force_dir/era5_025_scrip.nc" \
+  --mesh "$force_dir/era5_025_ESMFmesh.nc"
+
+ls -lh "$force_dir"

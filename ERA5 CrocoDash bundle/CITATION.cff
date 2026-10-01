@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: >-
+  If you use the ERA5 CrocoDash extension or workflow, please cite this
+  software and the upstream CrocoDash software.
+title: ERA5 Atmospheric Forcing Extension for CrocoDash and Regional MOM6
+type: software
+authors:
+  - given-names: Faezeh
+    family-names: Maghsoodifar
+    affiliation: The University of Alabama
+    email: fmaghsoodifar@crimson.ua.edu
+version: 1.0.0
+date-released: 2026-10-01
+license: Apache-2.0
+keywords:
+  - ERA5
+  - CrocoDash
+  - MOM6
+  - CESM
+  - CDEPS
+  - regional ocean modeling
+  - atmospheric forcing
+  - hurricane storm surge
+abstract: >-
+  A reusable CrocoDash extension and NCAR workflow that preprocesses eight
+  ERA5 atmospheric fields and supplies them through the CDEPS JRA interface
+  to regional MOM6 cases. The included Hurricane Ike example demonstrates a
+  full ERA5-forced 21-day Gulf of Mexico simulation.

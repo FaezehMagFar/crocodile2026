@@ -1,0 +1,22 @@
+name: era5-crocodash
+channels:
+  - conda-forge
+dependencies:
+  - python>=3.11
+  - numpy
+  - pandas
+  - xarray
+  - dask
+  - netcdf4
+  - h5netcdf
+  - scipy
+  - esmpy
+  - xesmf
+  - matplotlib
+  - pillow
+  - pytest
+
+# Author: Faezeh Maghsoodifar
+# On NCAR systems, prefer the official CrocoDash environment and install the
+# bundle checkout editable. This file documents the extension's direct Python
+# requirements; it is not a replacement for the complete CROCODILE stack.

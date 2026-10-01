@@ -6,10 +6,6 @@
 The University of Alabama  
 fmaghsoodifar@crimson.ua.edu
 
-Faezeh Maghsoodifar authored the ERA5 atmospheric-forcing extension,
-preprocessing workflow, NCAR deployment/runbook, validation workflow, and
-regional MOM6 Hurricane Ike application distributed in this repository.
-
 ## Upstream projects
 
 This work extends CrocoDash and relies on CROCODILE-CESM, CESM, CDEPS, CMEPS,

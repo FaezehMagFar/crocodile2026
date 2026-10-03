@@ -1,0 +1,7 @@
+provider,station_id,status,reason
+noaa_coops,8771341,rejected,event coverage 63.2% is below required 80.0%
+noaa_coops,8771972,rejected,NOAA 8771972: {'message': 'No data was found. This product may not be offered at this station at the requested time.'}
+noaa_coops,8771486,rejected,NOAA 8771486: {'message': 'No data was found. This product may not be offered at this station at the requested time.'}
+noaa_coops,8770613,rejected,event coverage 80.0% is below required 80.0%
+noaa_coops,8771013,rejected,400 Client Error: Bad Request for url: https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?begin_date=20080908+00%3A00&end_date=20080916+00%3A00&station=8771013&product=water_level&datum=NAVD&time_zone=gmt&units=metric&format=json&application=autocf
+noaa_coops,8770971,rejected,event coverage 66.2% is below required 80.0%

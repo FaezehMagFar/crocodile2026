@@ -2,7 +2,7 @@
 
 **Author: Faezeh Maghsoodifar**  
 The University of Alabama  
-fmaghsoodifar@crimson.ua.edu
+https://github.com/FaezehMagFar
 
 This repository adds a complete ERA5 atmospheric-forcing pathway to
 [CrocoDash](https://github.com/CROCODILE-CESM/CrocoDash) regional MOM6 cases.

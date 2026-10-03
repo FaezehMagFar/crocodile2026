@@ -1,0 +1,6 @@
+{
+  "water_level_stations": "/home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/validation/water_level/stations.geojson",
+  "remote_sensing_validation": false,
+  "exposure_prepared": false,
+  "building_exposure_path": null
+}

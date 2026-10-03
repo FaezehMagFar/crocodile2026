@@ -1,0 +1,54 @@
+{
+  "target_vertical_datum": "NAVD88",
+  "primary": {
+    "source": "noaa_cudem_1_9_arcsec",
+    "native_vertical_datum": "NAVD88",
+    "confidence": "authoritative",
+    "note": "NOAA NCEI Ninth topobathymetric DEM (CONUS) is distributed in NAVD88.",
+    "surface": "topobathy",
+    "temporal": {
+      "acquisition_date": null,
+      "compatibility": "unknown",
+      "note": "No acquisition date was supplied; product editions are not treated as acquisition dates."
+    }
+  },
+  "gapfill": {
+    "source": "gebco_2024_15_arcsec",
+    "native_vertical_datum": "MSL",
+    "confidence": "assumed",
+    "note": "GEBCO is treated as mean-sea-level referenced; its compiled sources may vary locally.",
+    "surface": "topobathy",
+    "temporal": {
+      "acquisition_date": null,
+      "compatibility": "unknown",
+      "note": "No acquisition date was supplied; product editions are not treated as acquisition dates."
+    },
+    "alignment": {
+      "method": "local-overlap-median",
+      "offset_m": -2.5072735640525634,
+      "sample_count": 54262,
+      "difference_median_m": -2.5072735640525634,
+      "difference_mad_m": 1.2680805453299357,
+      "difference_p05_m": -8.494915829696623,
+      "difference_p95_m": 1.3570470463657316,
+      "primary_datum": "NAVD88",
+      "source_datum": "MSL",
+      "target_datum": "NAVD88",
+      "output": "/home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/terrain/rasters/topobathy_02_gebco_2024_15_arcsec_aligned_navd88_500m.tif",
+      "created_utc": "2026-09-29T21:40:44.751742+00:00",
+      "qualification": "Local empirical alignment; not a NOAA VDatum transformation.",
+      "engine_requested": "auto",
+      "fallback_from": "Transformez",
+      "fallback_reason": "The isolated Transformez helper is not accessible.",
+      "quality": "approximate"
+    }
+  },
+  "policy": "align_gapfill",
+  "engine_requested": "auto",
+  "transformez": {
+    "available": false,
+    "executable": null,
+    "role": "isolated rigorous grid-based vertical transformation",
+    "note": "The isolated Transformez helper is not accessible from this execution backend; automatic mode will use the local overlap alignment fallback when source and target datums differ."
+  }
+}

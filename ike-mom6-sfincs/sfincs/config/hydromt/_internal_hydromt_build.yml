@@ -1,0 +1,93 @@
+global:
+  data_libs: []
+setup_config:
+  tref: 20080908 000000
+  tstart: 20080908 000000
+  tstop: 20080916 000000
+  dtout: 3600
+  dthisout: 360
+  dtmaxout: 3600
+  inputformat: bin
+  outputformat: net
+  obsfile: sfincs.obs
+  advection: 1
+  alpha: 0.5
+  huthresh: 0.05
+  theta: 1.0
+  qinf: 0.0
+  viscosity: 1
+  storecumprcp: 1
+  storevelmax: 1
+  baro: 1
+setup_grid_from_region:
+  res: 200.0
+  crs: utm
+  rotated: false
+setup_dep:
+  datasets_dep:
+  - elevtn: topobathy_primary_grid
+    merge_method: first
+    reproj_method: bilinear
+  - elevtn: gebco_500m
+    merge_method: first
+    reproj_method: bilinear
+  interp_method: linear
+  buffer_cells: 0
+setup_mask_active:
+  mask: /home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/geospatial/vectors/domain.geojson
+  zmin: -50.0
+  zmax: 20.0
+  fill_area: 10.0
+  drop_area: 0.0
+  connectivity: 8
+  all_touched: true
+  reset_mask: true
+setup_mask_bounds:
+  btype: waterlevel
+  include_mask: /home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/geospatial/vectors/ocean_bc_line.geojson
+  include_mask_buffer: 600.0
+  zmax: 5.0
+  connectivity: 8
+  all_touched: true
+  reset_bounds: true
+setup_subgrid:
+  datasets_dep:
+  - elevtn: topobathy_primary
+    merge_method: first
+    reproj_method: bilinear
+  - elevtn: gebco_500m
+    merge_method: first
+    reproj_method: bilinear
+  datasets_rgh:
+  - lulc: esa_worldcover
+    reclass_table: esa_worldcover_mapping
+  buffer_cells: 0
+  nr_subgrid_pixels: 20
+  nrmax: 2000
+  manning_land: 0.04
+  manning_sea: 0.02
+  rgh_lev_land: 0.0
+  write_dep_tif: true
+  write_man_tif: true
+  nbins: 10
+setup_cn_infiltration:
+  cn: gcn250
+  antecedent_moisture: avg
+setup_waterlevel_forcing:
+  timeseries: /home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/forcing/tables/noaa_boundary_timeseries.csv
+  locations: /home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/geospatial/vectors/noaa_boundary_locations.geojson
+  buffer: 5000.0
+  merge: true
+setup_wind_forcing_from_grid:
+  wind: forcing_wind
+setup_pressure_forcing_from_grid:
+  press: forcing_pressure
+setup_precip_forcing_from_grid:
+  precip: forcing_precip
+setup_observation_points:
+  locations: /home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/geospatial/vectors/noaa_validation_obs.geojson
+  merge: true
+setup_discharge_forcing:
+  timeseries: /home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/forcing/tables/usgs_discharge_m3s.csv
+  locations: /home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/geospatial/vectors/usgs_discharge_locations.geojson
+  merge: true

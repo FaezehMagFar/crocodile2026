@@ -1,0 +1,9 @@
+{
+"type": "FeatureCollection",
+"name": "stations",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "provider": "noaa_coops", "station_id": "8770777", "name": "Manchester", "country": "United States", "lon": -95.2658, "lat": 29.7263, "datum": "NAVD", "distance_km": 0.0, "inside_domain": true, "observation_path": "/home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/validation/water_level/obs_noaa_coops_8770777.csv", "n_observations": 1919, "coverage_fraction": 0.99895887558563246, "ID": 1, "provider_station_id": "8770777" }, "geometry": { "type": "Point", "coordinates": [ -95.2658, 29.7263 ] } },
+{ "type": "Feature", "properties": { "provider": "noaa_coops", "station_id": "8771450", "name": "Galveston Pier 21", "country": "United States", "lon": -94.7933, "lat": 29.31, "datum": "NAVD", "distance_km": 0.0, "inside_domain": true, "observation_path": "/home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/validation/water_level/obs_noaa_coops_8771450.csv", "n_observations": 1870, "coverage_fraction": 0.97345132743362828, "ID": 2, "provider_station_id": "8771450" }, "geometry": { "type": "Point", "coordinates": [ -94.7933, 29.31 ] } }
+]
+}

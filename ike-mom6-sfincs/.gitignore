@@ -1,0 +1,23 @@
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.venv/
+.env
+.env.*
+*.nc
+*.nc4
+*.tif
+*.tiff
+*.vrt
+*.bundle
+*.zip
+*.tar
+*.gz
+*.bak
+*.backup*
+*.log
+.DS_Store
+Thumbs.db
+
+# The requested complete model archive is intentionally versioned through LFS.
+!sfincs/archive/SFINCS_Model_Galveston_Ike_2008.zip

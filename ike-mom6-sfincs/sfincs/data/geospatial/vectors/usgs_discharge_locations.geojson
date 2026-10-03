@@ -1,0 +1,16 @@
+{
+"type": "FeatureCollection",
+"name": "usgs_discharge_locations",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "ID": 1, "name": "08077600", "usgs_site_no": "08077600", "river_source_id": "1", "index": 1 }, "geometry": { "type": "Point", "coordinates": [ -95.178544, 29.51745517 ] } },
+{ "type": "Feature", "properties": { "ID": 2, "name": "08075605", "usgs_site_no": "08075605", "river_source_id": "2", "index": 2 }, "geometry": { "type": "Point", "coordinates": [ -95.2291011, 29.65661915 ] } },
+{ "type": "Feature", "properties": { "ID": 3, "name": "08067525", "usgs_site_no": "08067525", "river_source_id": "3", "index": 3 }, "geometry": { "type": "Point", "coordinates": [ -94.9996503, 29.77078197 ] } },
+{ "type": "Feature", "properties": { "ID": 4, "name": "08075730", "usgs_site_no": "08075730", "river_source_id": "4", "index": 4 }, "geometry": { "type": "Point", "coordinates": [ -95.216323, 29.69467363 ] } },
+{ "type": "Feature", "properties": { "ID": 5, "name": "08076997", "usgs_site_no": "08076997", "river_source_id": "5", "index": 5 }, "geometry": { "type": "Point", "coordinates": [ -95.2974366, 29.5968991 ] } },
+{ "type": "Feature", "properties": { "ID": 6, "name": "08078000", "usgs_site_no": "08078000", "river_source_id": "6", "index": 6 }, "geometry": { "type": "Point", "coordinates": [ -95.3230673, 29.37154704 ] } },
+{ "type": "Feature", "properties": { "ID": 7, "name": "08075500", "usgs_site_no": "08075500", "river_source_id": "7", "index": 7 }, "geometry": { "type": "Point", "coordinates": [ -95.2893807, 29.67439687 ] } },
+{ "type": "Feature", "properties": { "ID": 8, "name": "08075110", "usgs_site_no": "08075110", "river_source_id": "8", "index": 8 }, "geometry": { "type": "Point", "coordinates": [ -95.3388889, 29.71416667 ] } },
+{ "type": "Feature", "properties": { "ID": 9, "name": "08075770", "usgs_site_no": "08075770", "river_source_id": "9", "index": 9 }, "geometry": { "type": "Point", "coordinates": [ -95.2679907, 29.79328217 ] } }
+]
+}

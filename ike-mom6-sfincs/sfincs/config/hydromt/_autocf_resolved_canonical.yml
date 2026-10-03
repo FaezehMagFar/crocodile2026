@@ -1,0 +1,338 @@
+model:
+  mode: subgrid
+  dx_m: 200
+  crs: utm
+  rotated: false
+  topobathy:
+    target_vertical_datum: NAVD88
+    datum_policy: align_gapfill
+    datum_engine: auto
+    buffer_km: 10
+    primary:
+      source: NOAA_CUDEM_1_9_ARCSEC
+      output_resolution_m: 10
+      vertical_datum: NAVD88
+    gapfill:
+      source: GEBCO_2024_15_ARCSEC
+      cog_url: https://s3.us-west-2.amazonaws.com/us-west-2.opendata.source.coop/alexgleith/gebco-2024/GEBCO_2024.tif
+      output_resolution_m: 500
+      vertical_datum: MSL
+  roughness:
+    source: ESA_WorldCover_2021_v200
+    resolution_m: 10
+    tile_url_template: https://esa-worldcover.s3.eu-central-1.amazonaws.com/v200/2021/map/ESA_WorldCover_10m_2021_v200_{tile}_Map.tif
+    buffer_km: 10
+    manning_mapping: default_esa_worldcover
+  subgrid:
+    nlevels: 10
+    nr_subgrid_pixels: 20
+    nrmax: 2000
+    buffer_cells: 0
+    huthresh: 0.01
+    manning_land: 0.04
+    manning_sea: 0.02
+    rgh_lev_land: 0.0
+    landcover_output_resolution_m: 10
+    write_dep_tif: true
+    write_man_tif: true
+    q_table_option: 2
+    weight_option: min
+  infiltration:
+    method: cn
+    source: gcn250
+    antecedent_moisture: avg
+    enabled: true
+  vertical_datum: NAVD88
+project:
+  layout_version: 2
+  name: galv_ike2008_noaa_sg
+  output_dir: /home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg
+  cache_dir: /home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/cache
+  overwrite: false
+  run_name: galv_ike2008_noaa_sg
+  workspace_root: /home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/projects
+geojson:
+  path: /home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/data/galveston/region_bbox.geojson
+workflow:
+  mode: build_only
+  require_internet_for_build: true
+simulation:
+  event_name: Ike_2008
+  time_zone: UTC
+  start: '2008-09-08T00:00:00Z'
+  end: '2008-09-16T00:00:00Z'
+mesh:
+  type: regular
+  dx_m: 200
+  crs: utm
+  rotated: false
+subgrid:
+  nlevels: 10
+  nr_subgrid_pixels: 20
+  nrmax: 2000
+  buffer_cells: 0
+  huthresh: 0.01
+  manning_land: 0.04
+  manning_sea: 0.02
+  rgh_lev_land: 0.0
+  landcover_output_resolution_m: 10
+  write_dep_tif: true
+  write_man_tif: true
+  q_table_option: 2
+  weight_option: min
+topobathy:
+  target_vertical_datum: NAVD88
+  datum_policy: align_gapfill
+  datum_engine: auto
+  primary:
+    source: NOAA_CUDEM_1_9_ARCSEC
+    vrt_url: https://coast.noaa.gov/htdata/raster2/elevation/NCEI_ninth_Topobathy_2014_8483/NCEI_ninth_Topobathy_2014_m8483_EPSG-4269.vrt
+    output_resolution_m: 10
+    vertical_datum: NAVD88
+  gapfill:
+    source: GEBCO_2024_15_ARCSEC
+    cog_url: https://s3.us-west-2.amazonaws.com/us-west-2.opendata.source.coop/alexgleith/gebco-2024/GEBCO_2024.tif
+    output_resolution_m: 500
+    vertical_datum: MSL
+  buffer_km: 10
+landcover:
+  source: ESA_WorldCover_2021_v200
+  resolution_m: 10
+  tile_url_template: https://esa-worldcover.s3.eu-central-1.amazonaws.com/v200/2021/map/ESA_WorldCover_10m_2021_v200_{tile}_Map.tif
+  buffer_km: 10
+  manning_mapping: default_esa_worldcover
+infiltration:
+  method: cn
+  source: gcn250
+  antecedent_moisture: avg
+forcing:
+  precipitation:
+    source: aorc
+  wind:
+    source: aorc
+  pressure:
+    source: aorc
+  ocean_boundary:
+    source: noaa_coops
+    datum: NAVD
+    units: metric
+    time_zone: gmt
+    interval_minutes: 6
+    max_station_distance_km: 150
+    max_missing_fraction: 0.1
+  river:
+    source: usgs_auto
+    parameter_cd: '00060'
+    max_gage_distance_km: 50
+    max_missing_fraction: 0.25
+    unit_mult: 0.028316846592
+    interval_minutes: 15
+    max_gages: 12
+  ocean:
+    source: noaa_coops
+    datum: NAVD
+    units: metric
+    time_zone: gmt
+    interval_minutes: 6
+    max_station_distance_km: 150
+    max_missing_fraction: 0.1
+atmosphere:
+  source: ERA5
+  cache_subdir: era5
+  cds_dataset: reanalysis-era5-single-levels
+  spatial_buffer_degrees: 0.5
+  variables:
+    wind_u:
+      era5_name: 10m_u_component_of_wind
+      raw_short_name: u10
+      final_name: wind_u
+      unit_mult: 1.0
+      unit_add: 0.0
+      valid_min: -100.0
+      valid_max: 100.0
+    wind_v:
+      era5_name: 10m_v_component_of_wind
+      raw_short_name: v10
+      final_name: wind_v
+      unit_mult: 1.0
+      unit_add: 0.0
+      valid_min: -100.0
+      valid_max: 100.0
+    pressure:
+      era5_name: mean_sea_level_pressure
+      raw_short_name: msl
+      final_name: press
+      unit_mult: 1.0
+      unit_add: 0.0
+      valid_min: 85000.0
+      valid_max: 110000.0
+    precipitation:
+      era5_name: total_precipitation
+      raw_short_name: tp
+      final_name: precip
+      unit_mult: 1000.0
+      unit_add: 0.0
+      valid_min: 0.0
+      valid_max: 500.0
+  precip_cumulative_input: true
+noaa_boundary:
+  source: NOAA_COOPS
+  product: water_level
+  datum: NAVD
+  units: metric
+  time_zone: gmt
+  interval_minutes: 6
+  max_station_distance_km: 150
+  max_missing_fraction: 0.1
+  min_valid_fraction: 0.9
+evaluation:
+  observations:
+    source: noaa_coops
+impact:
+  enabled: false
+analysis:
+  enabled: false
+  attribution:
+    primary_min_depth_m: 0.1
+    depth_thresholds_m:
+    - 0.15
+    - 0.3
+    - 0.6
+    - 1.0
+    - 2.0
+  exposure:
+    enabled: false
+    buildings:
+      enabled: true
+      source: overture
+    population:
+      enabled: true
+      source: worldpop
+    depth_definition: excess_over_none
+  duration:
+    enabled: false
+  social_vulnerability:
+    enabled: false
+  land_mask:
+    enabled: true
+    worldcover_water_classes:
+    - 80
+    min_land_fraction: 0.5
+noaa_validation:
+  enabled: true
+  source: NOAA_COOPS
+  product: water_level
+  datum: NAVD
+  units: metric
+  time_zone: gmt
+  interval_minutes: 6
+  station_selection: all_inside_domain
+  max_missing_fraction: 0.2
+usgs_rivers:
+  enabled: true
+  source: USGS_NWIS
+  parameter_cd: '00060'
+  max_gage_distance_km: 50
+  max_missing_fraction: 0.25
+  unit_mult: 0.028316846592
+  interval_minutes: 15
+  max_gages: 12
+hydromt:
+  use_hydromt_cli: true
+  build_verbosity: -vv
+  active_zmin_m: -50.0
+  active_zmax_m: 20.0
+  boundary_include_buffer_m: 600.0
+  boundary_zmax_m: 5.0
+  boundary_point_spacing_m: 5000.0
+sfincs:
+  executable: /usr/local/bin/sfincs-cpu
+  input_file: sfincs.inp
+  dtout_seconds: 3600
+  dthisout_seconds: 360
+  dtmaxout_seconds: 3600
+  outputformat: net
+  inputformat: bin
+  additional_parameters:
+    advection: 1
+    alpha: 0.5
+    huthresh: 0.05
+    theta: 1.0
+    viscosity: 1
+    storecumprcp: 1
+    storevelmax: 1
+postprocess:
+  hmax_variable_candidates:
+  - hmax
+  - zsmax
+  - max_water_depth
+  make_hmax_png: true
+  make_hmax_tif: true
+  noaa_comparison_csv: noaa_station_comparison.csv
+validation:
+  stop_on_warning: true
+  write_report: true
+  water_level:
+    enabled: true
+    provider: auto
+    provider_order:
+    - noaa_coops
+    - gesla
+    - uhslc_rq
+    - uhslc_fast
+    station_selection: strict_inside_domain
+    max_stations: 12
+    min_stations: 1
+    candidate_limit_per_provider: 30
+    min_observations: 4
+    max_missing_fraction: 0.2
+    datum_mode: auto
+    datum_alignment_window_hours:
+    - 0
+    - 12
+    min_alignment_pairs: 3
+    exclude_alignment_window_from_scores: true
+    time_tolerance_minutes: auto
+    reuse_existing_model_stations: true
+    noaa:
+      product: water_level
+      units: metric
+      time_zone: gmt
+      interval_minutes: 6
+      datum: NAVD
+    uhslc:
+      dataset: global_hourly_fast
+  strict: false
+  hwm:
+    enabled: true
+    provider: usgs_stn
+    domain_buffer_km: 5
+    accepted_qualities:
+    - excellent
+    - good
+    - fair
+    datum_policy: require_match
+    vertical_datum_offset_m: null
+geometry:
+  path: /home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/data/galveston/region_bbox.geojson
+runtime:
+  core_agent: sfincs_agent.pyc
+  evaluator: sfincs_eval.pyc
+  attribution_script: sfincs_attribution.pyc
+  sfincs:
+    executable: /usr/local/bin/sfincs-cpu
+    input_file: sfincs.inp
+    dtout_seconds: 3600
+    dthisout_seconds: 360
+    dtmaxout_seconds: 3600
+    outputformat: net
+    inputformat: bin
+    additional_parameters:
+      advection: 1
+      alpha: 0.5
+      huthresh: 0.05
+      theta: 1.0
+      qinf: 0.0
+      viscosity: 1
+      storecumprcp: 1
+      storevelmax: 1

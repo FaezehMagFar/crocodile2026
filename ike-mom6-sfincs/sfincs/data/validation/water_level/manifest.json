@@ -1,0 +1,51 @@
+{
+  "status": "ready",
+  "stations_file": "/home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/validation/water_level/stations.geojson",
+  "simulation_start": "2008-09-08T00:00:00+00:00",
+  "simulation_end": "2008-09-16T00:00:00+00:00",
+  "station_selection": "strict_domain_covers",
+  "provider_order": [
+    "noaa_coops",
+    "gesla",
+    "uhslc_rq",
+    "uhslc_fast"
+  ],
+  "provider_errors": {},
+  "provider_candidate_counts": {
+    "noaa_coops": {
+      "discovered": 302,
+      "inside_domain": 8
+    }
+  },
+  "stations": [
+    {
+      "provider": "noaa_coops",
+      "station_id": "8770777",
+      "name": "Manchester",
+      "country": "United States",
+      "lon": -95.2658,
+      "lat": 29.7263,
+      "datum": "NAVD",
+      "distance_km": 0.0,
+      "inside_domain": true,
+      "observation_path": "/home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/validation/water_level/obs_noaa_coops_8770777.csv",
+      "n_observations": 1919,
+      "coverage_fraction": 0.9989588755856325
+    },
+    {
+      "provider": "noaa_coops",
+      "station_id": "8771450",
+      "name": "Galveston Pier 21",
+      "country": "United States",
+      "lon": -94.7933,
+      "lat": 29.31,
+      "datum": "NAVD",
+      "distance_km": 0.0,
+      "inside_domain": true,
+      "observation_path": "/home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/validation/water_level/obs_noaa_coops_8771450.csv",
+      "n_observations": 1870,
+      "coverage_fraction": 0.9734513274336283
+    }
+  ],
+  "note": "Remote-sensing flood-extent products are intentionally not used. GESLA datum information is unspecified and UHSLC sea levels are relative to station zero; both therefore use datum-neutral event alignment unless an absolute datum match is explicitly known."
+}

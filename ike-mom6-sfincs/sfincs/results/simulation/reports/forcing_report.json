@@ -1,0 +1,55 @@
+{
+  "notes": {
+    "aorc": "source=aorc auto-downloads/subsets NOAA AORC unless a provider path is supplied.",
+    "mrms": "MRMS remains file-backed in public V1.",
+    "pressure": "May be ERA5, automatic/file AORC, generic file, or none."
+  },
+  "providers": {
+    "ocean_boundary": {
+      "datum": "NAVD",
+      "interval_minutes": 6,
+      "max_missing_fraction": 0.1,
+      "max_station_distance_km": 150,
+      "source": "noaa_coops",
+      "time_zone": "gmt",
+      "units": "metric"
+    },
+    "precipitation": {
+      "source": "aorc"
+    },
+    "pressure": {
+      "source": "aorc"
+    },
+    "river": {
+      "interval_minutes": 15,
+      "max_gage_distance_km": 50,
+      "max_gages": 12,
+      "max_missing_fraction": 0.25,
+      "max_sources": 12,
+      "min_upstream_area_km2": 500.0,
+      "parameter_cd": "00060",
+      "product_type": "consolidated",
+      "source": "usgs_auto",
+      "system_version": "version_4_0",
+      "unit_mult": 0.028316846592
+    },
+    "wind": {
+      "source": "aorc"
+    }
+  },
+  "resolved_files": {
+    "ocean_locations": "/home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/geospatial/vectors/noaa_boundary_locations.geojson",
+    "ocean_timeseries": "/home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/forcing/tables/noaa_boundary_timeseries.csv",
+    "precipitation": "/home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/forcing/netcdf/aorc_precip_standardized.nc",
+    "pressure": "/home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/forcing/netcdf/aorc_pressure_standardized_pa.nc",
+    "river_locations": "/home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/geospatial/vectors/usgs_discharge_locations.geojson",
+    "river_timeseries": "/home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/forcing/tables/usgs_discharge_m3s.csv",
+    "wind": "/home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/forcing/netcdf/aorc_wind_standardized.nc"
+  },
+  "simulation": {
+    "end": "2008-09-16T00:00:00Z",
+    "event_name": "Ike_2008",
+    "start": "2008-09-08T00:00:00Z",
+    "time_zone": "UTC"
+  }
+}

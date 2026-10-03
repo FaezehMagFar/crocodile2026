@@ -1,0 +1,57 @@
+{
+  "aoi_bbox_wgs84": [
+    -95.45891178999995,
+    28.955868372000054,
+    -94.44087976999998,
+    29.96099503100004
+  ],
+  "components": [
+    "precipitation",
+    "wind",
+    "pressure"
+  ],
+  "details": {
+    "precipitation": {
+      "finite_fraction": 1.0,
+      "maximum_gap_hours": 1.0,
+      "path": "/home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/forcing/netcdf/aorc_precip_standardized.nc",
+      "status": "PASS",
+      "time_end": "2008-09-16T00:00:00",
+      "time_start": "2008-09-08T00:00:00",
+      "time_steps": 193,
+      "value_range": [
+        0.0,
+        93.60000139474869
+      ]
+    },
+    "pressure": {
+      "finite_fraction": 1.0,
+      "maximum_gap_hours": 1.0,
+      "path": "/home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/forcing/netcdf/aorc_pressure_standardized_pa.nc",
+      "status": "PASS",
+      "time_end": "2008-09-16T00:00:00",
+      "time_start": "2008-09-08T00:00:00",
+      "time_steps": 193,
+      "value_range": [
+        97720.0,
+        102060.0
+      ]
+    },
+    "wind": {
+      "finite_fraction": 1.0,
+      "maximum_gap_hours": 1.0,
+      "path": "/home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/forcing/netcdf/aorc_wind_standardized.nc",
+      "status": "PASS",
+      "time_end": "2008-09-16T00:00:00",
+      "time_start": "2008-09-08T00:00:00",
+      "time_steps": 193,
+      "value_range": [
+        -24.600000366568565,
+        20.800000309944153
+      ]
+    }
+  },
+  "simulation_end": "2008-09-16T00:00:00",
+  "simulation_start": "2008-09-08T00:00:00",
+  "status": "PASS"
+}

@@ -1,0 +1,35 @@
+{
+  "raster": "/home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/terrain/rasters/topobathy_source_provenance_model_grid.tif",
+  "codes": {
+    "0": "no-data",
+    "1": "Source 1",
+    "2": "Source 2"
+  },
+  "cell_count": 403535,
+  "counts": {
+    "0": 0,
+    "1": 338168,
+    "2": 65367
+  },
+  "fractions": {
+    "0": 0.0,
+    "1": 0.8380140508258268,
+    "2": 0.16198594917417325
+  },
+  "resolution": "model grid",
+  "primary": {
+    "source": "noaa_cudem_1_9_arcsec",
+    "native_vertical_datum": "NAVD88",
+    "confidence": "authoritative",
+    "note": "NOAA NCEI Ninth topobathymetric DEM (CONUS) is distributed in NAVD88.",
+    "surface": "topobathy"
+  },
+  "gapfill": {
+    "source": "gebco_2024_15_arcsec",
+    "native_vertical_datum": "MSL",
+    "confidence": "assumed",
+    "note": "GEBCO is treated as mean-sea-level referenced; its compiled sources may vary locally.",
+    "surface": "topobathy"
+  },
+  "priority": "Source 1 supplies valid cells; Source 2 supplies only remaining gaps."
+}

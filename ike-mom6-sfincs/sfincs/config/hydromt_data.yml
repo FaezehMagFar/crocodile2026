@@ -1,0 +1,158 @@
+domain.geojson:
+  data_type: GeoDataFrame
+  provider: user
+  path: /home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/geospatial/vectors/domain.geojson
+  driver: vector
+esa_worldcover:
+  data_type: RasterDataset
+  path: /home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/surface/rasters/esa_worldcover_model_crs_subgrid_10m.tif
+  driver: raster
+  driver_kwargs:
+    chunks:
+      x: 1024
+      y: 1024
+  filesystem: local
+  meta:
+    category: landuse
+    source: ESA WorldCover 2021 v200
+esa_worldcover_mapping:
+  data_type: DataFrame
+  path: /home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/surface/tables/esa_worldcover_manning_default.csv
+  driver: csv
+  meta:
+    category: landuse
+    notes: Manning n by ESA WorldCover class
+forcing_precip:
+  data_type: RasterDataset
+  path: /home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/forcing/netcdf/aorc_precip_standardized.nc
+  driver: netcdf
+  driver_kwargs:
+    decode_times: true
+  meta:
+    category: meteo
+    unit: precipitation rate mm/hr
+  crs: 4326
+forcing_pressure:
+  data_type: RasterDataset
+  path: /home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/forcing/netcdf/aorc_pressure_standardized_pa.nc
+  driver: netcdf
+  driver_kwargs:
+    decode_times: true
+  meta:
+    category: meteo
+    unit: Pa
+  crs: 4326
+forcing_wind:
+  data_type: RasterDataset
+  path: /home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/forcing/netcdf/aorc_wind_standardized.nc
+  driver: netcdf
+  driver_kwargs:
+    decode_times: true
+  meta:
+    category: meteo
+    unit: m/s
+  crs: 4326
+gcn250:
+  data_type: RasterDataset
+  path: /home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/surface/rasters/gcn250_avg_model_crs_200m_df196fc5945c8974.tif
+  driver: raster
+  filesystem: local
+  nodata: 255
+  meta:
+    category: infiltration
+    unit: curve number
+    source: GCN250 / Jaafar & Ahmad (2019)
+    paper_doi: 10.1038/s41597-019-0155-x
+    dataset_doi: 10.6084/m9.figshare.7756202.v1
+gebco_500m:
+  data_type: RasterDataset
+  path: /home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/terrain/rasters/topobathy_02_gebco_2024_15_arcsec_aligned_navd88_500m.tif
+  driver: raster
+  driver_kwargs:
+    chunks:
+      x: 1024
+      y: 1024
+  filesystem: local
+  meta:
+    category: topography
+    unit: m+NAVD88
+    vertical_datum: NAVD88
+    source: configured aligned gap-fill topobathy
+  crs: !!python/object/new:rasterio.crs.CRS
+    state: PROJCS["WGS 84 / UTM zone 15N",GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS
+      84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",0],PARAMETER["central_meridian",-93],PARAMETER["scale_factor",0.9996],PARAMETER["false_easting",500000],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","32615"]]
+noaa_boundary_locations.geojson:
+  data_type: GeoDataFrame
+  provider: user
+  path: /home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/geospatial/vectors/noaa_boundary_locations.geojson
+  driver: vector
+  crs: &id001 !!python/object:pyproj.crs.crs.CRS
+    srs: EPSG:32615
+noaa_boundary_timeseries.csv:
+  data_type: DataFrame
+  provider: user
+  path: /home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/forcing/tables/noaa_boundary_timeseries.csv
+  driver: csv
+  driver_kwargs:
+    parse_dates: true
+    index_col: 0
+noaa_validation_obs.geojson:
+  data_type: GeoDataFrame
+  provider: user
+  path: /home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/geospatial/vectors/noaa_validation_obs.geojson
+  driver: vector
+  driver_kwargs:
+    assert_gtype: Point
+ocean_bc_line.geojson:
+  data_type: GeoDataFrame
+  provider: user
+  path: /home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/geospatial/vectors/ocean_bc_line.geojson
+  driver: vector
+topobathy_primary:
+  data_type: RasterDataset
+  path: /home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/terrain/rasters/topobathy_01_noaa_cudem_1_9_arcsec_model_crs_10m.tif
+  driver: raster
+  driver_kwargs:
+    chunks:
+      x: 1024
+      y: 1024
+  filesystem: local
+  meta:
+    category: topography
+    unit: m+NAVD88
+    vertical_datum: NAVD88
+    source: configured primary topobathy
+  crs: !!python/object/new:rasterio.crs.CRS
+    state: PROJCS["WGS 84 / UTM zone 15N",GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS
+      84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",0],PARAMETER["central_meridian",-93],PARAMETER["scale_factor",0.9996],PARAMETER["false_easting",500000],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","32615"]]
+topobathy_primary_grid:
+  data_type: RasterDataset
+  path: /home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/terrain/rasters/topobathy_primary_grid_200m.tif
+  driver: raster
+  driver_kwargs:
+    chunks:
+      x: 1024
+      y: 1024
+  filesystem: local
+  meta:
+    category: topography
+    unit: m+NAVD88
+    vertical_datum: NAVD88
+    source: primary topobathy at model-grid resolution
+  crs: !!python/object/new:rasterio.crs.CRS
+    state: PROJCS["WGS 84 / UTM zone 15N",GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS
+      84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",0],PARAMETER["central_meridian",-93],PARAMETER["scale_factor",0.9996],PARAMETER["false_easting",500000],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","32615"]]
+usgs_discharge_locations.geojson:
+  data_type: GeoDataFrame
+  provider: user
+  path: /home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/geospatial/vectors/usgs_discharge_locations.geojson
+  driver: vector
+  crs: *id001
+usgs_discharge_m3s.csv:
+  data_type: DataFrame
+  provider: user
+  path: /home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/forcing/tables/usgs_discharge_m3s.csv
+  driver: csv
+  driver_kwargs:
+    parse_dates: true
+    index_col: 0

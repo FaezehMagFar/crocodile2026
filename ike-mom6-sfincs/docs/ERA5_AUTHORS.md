@@ -2,9 +2,13 @@
 
 ## ERA5 extension author
 
-**Faezeh Maghsoodifar**  
-The University of Alabama  
+**Faezeh Maghsoodifar**<br>
+The University of Alabama<br>
 https://github.com/FaezehMagFar
+
+Faezeh Maghsoodifar authored the ERA5 atmospheric-forcing extension,
+preprocessing workflow, NCAR deployment/runbook, validation workflow, and
+regional MOM6 Hurricane Ike application distributed in this repository.
 
 ## Upstream projects
 

@@ -1,5 +1,5 @@
 From e80e8414016c8ac5d24d13d50d52dfe544cf035a Mon Sep 17 00:00:00 2001
-From: Faezeh Maghsoodifar <fmaghsoodifar@crimson.ua.edu>
+From: Faezeh Maghsoodifar <145299921+FaezehMagFar@users.noreply.github.com>
 Date: Thu, 1 Oct 2026 14:32:47 -0600
 Subject: [PATCH] Add full ERA5 atmospheric forcing for CrocoDash
 
@@ -681,7 +681,7 @@ index 0000000..57fbd47
 +ERA5 integration, preprocessing workflow, tests, and NCAR application materials:
 +Copyright 2026 Faezeh Maghsoodifar
 +The University of Alabama
-+fmaghsoodifar@crimson.ua.edu
++https://github.com/FaezehMagFar
 +
 +This extension modifies CrocoDash, originally developed by the CROCODILE-CESM
 +community and distributed under the Apache License, Version 2.0. Original

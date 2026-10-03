@@ -1,0 +1,37 @@
+{
+  "adjusted": false,
+  "configured_subgrid_pixels": 20,
+  "mesh_dx_m": 200.0,
+  "model_mode": "subgrid",
+  "model_useful_resolution_m": 10.0,
+  "note": "AutoCF preserves the configured mesh, subgrid samples, and prepared source-raster resolution. Large workloads are reported but are not automatically coarsened.",
+  "pixel_limit": 150000000,
+  "policy": "configured_resolution_preserved",
+  "prepared_plan": {
+    "columns": 12102,
+    "height_m": 133363.42252915632,
+    "maxx": 371069.87728325656,
+    "maxy": 3327213.5905109253,
+    "minx": 250057.93594390556,
+    "miny": 3193850.167981769,
+    "pixels": 161404374,
+    "resolution_m": 10.0,
+    "rows": 13337,
+    "width_m": 121011.941339351
+  },
+  "prepared_resolution_m": 10.0,
+  "requested_plan": {
+    "columns": 12102,
+    "height_m": 133363.42252915632,
+    "maxx": 371069.87728325656,
+    "maxy": 3327213.5905109253,
+    "minx": 250057.93594390556,
+    "miny": 3193850.167981769,
+    "pixels": 161404374,
+    "resolution_m": 10.0,
+    "rows": 13337,
+    "width_m": 121011.941339351
+  },
+  "requested_source_resolution_m": 10.0,
+  "runtime_adjustment": {}
+}

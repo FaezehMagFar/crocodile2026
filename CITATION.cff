@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use this Hurricane Ike ERA5–MOM6–SFINCS workflow, please cite this repository and the upstream software and datasets listed in CREDITS_AND_CITATIONS.md."
+title: "Hurricane Ike ERA5–MOM6–SFINCS workflow"
+type: software
+authors:
+  - family-names: Maghsoodifar
+    given-names: Faezeh
+    affiliation: "The University of Alabama"
+version: 1.0.0
+date-released: 2026-10-03
+url: "https://github.com/FaezehMagFar/crocodile2026"
+repository-code: "https://github.com/FaezehMagFar/crocodile2026"
+keywords:
+  - Hurricane Ike
+  - MOM6
+  - SFINCS
+  - ERA5
+  - CrocoDash
+  - AutoCF
+  - coastal flooding

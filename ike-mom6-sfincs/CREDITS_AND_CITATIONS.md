@@ -1,0 +1,101 @@
+# Credits and citations
+
+Please credit the project author and cite the software and datasets that support
+the part of the workflow you reuse. Third-party names below do not imply their
+endorsement of this project.
+
+## Project author
+
+Faezeh Maghsoodifar, The University of Alabama.
+
+Use the repository-level `CITATION.cff` for the project citation.
+
+## AutoCF — primary SFINCS workflow credit
+
+**AutoCF v1.0.0 HPC release** was used to automate the Galveston Bay SFINCS
+model build, execute the GPU run, prepare forcing and terrain inputs, and create
+the evaluation/provenance products. The exact recorded commands are in
+`docs/AUTOCF_COMMANDS.md`, and generated configuration is under
+`sfincs/config/hydromt/`.
+
+The AutoCF executable, compiled Python modules, containers, and installer are
+**not redistributed** in this repository. The available release did not provide
+a public DOI or a complete bibliographic citation in the project materials.
+Until the provider supplies one, identify it explicitly as:
+
+> AutoCF, version 1.0.0 HPC release (2026), computer software used for SFINCS
+> model construction, execution, evaluation, and provenance generation.
+
+Users who have the AutoCF distribution must also follow its bundled license and
+review notice. If an official AutoCF DOI or author list becomes available, that
+official citation should replace the provisional wording above.
+
+## Modeling and workflow software
+
+- **SFINCS (Deltares).** Leijnse, T., van Ormondt, M., Nederhoff, K., and van
+  Dongeren, A. (2021). Modeling compound flooding in coastal systems using a
+  computationally efficient reduced-physics solver: including fluvial,
+  pluvial, tidal, wind- and wave-driven processes. *Coastal Engineering, 163*,
+  103796. https://doi.org/10.1016/j.coastaleng.2020.103796
+- **HydroMT.** Eilander, D., et al. (2023). HydroMT: Automated and reproducible
+  model building and analysis. *Journal of Open Source Software, 8*(83), 4897.
+  https://doi.org/10.21105/joss.04897
+- **HydroMT-SFINCS.** Deltares HydroMT plugin for SFINCS:
+  https://github.com/Deltares/hydromt_sfincs
+- **MOM6.** NOAA Geophysical Fluid Dynamics Laboratory Modular Ocean Model 6:
+  https://github.com/NOAA-GFDL/MOM6
+- **CrocoDash and CROCODILE.** CROCODILE-CESM regional MOM6 workflow software:
+  https://github.com/CROCODILE-CESM/CrocoDash and
+  https://github.com/CROCODILE-CESM
+- **CESM/CIME and CDEPS.** Community Earth System Model infrastructure:
+  https://github.com/ESCOMP/CESM
+- **Python analysis stack.** Jupyter, xarray, NumPy, pandas, SciPy, Matplotlib,
+  Cartopy, netCDF4, cftime, and the Copernicus Marine Toolbox. Report the exact
+  environment/version set when publishing derived work.
+
+## Atmospheric, ocean, terrain, and land-surface data
+
+- **ERA5.** Hersbach, H., et al. (2020). The ERA5 global reanalysis.
+  *Quarterly Journal of the Royal Meteorological Society, 146*(730), 1999–2049.
+  https://doi.org/10.1002/qj.3803. ERA5 hourly single-level data:
+  https://doi.org/10.24381/cds.adbb2d47
+- **Copernicus DUACS sea level.** *Global Ocean Gridded L4 Sea Surface Heights
+  and Derived Variables Reprocessed Copernicus Climate Service*, product
+  `SEALEVEL_GLO_PHY_CLIMATE_L4_MY_008_057`, dataset
+  `c3s_obs-sl_glo_phy-ssh_my_twosat-l4-duacs-0.25deg_P1D`.
+  https://doi.org/10.48670/moi-00145
+- **NOAA Analysis of Record for Calibration (AORC) v1.1.** Fall, G., et al.
+  (2023). The Office of Water Prediction's Analysis of Record for Calibration,
+  version 1.1: Dataset description and precipitation evaluation.
+  https://doi.org/10.1111/1752-1688.13143
+- **NOAA CO-OPS water levels.** Center for Operational Oceanographic Products
+  and Services (2018), NOAA NCEI. https://doi.org/10.25921/dt9g-2p60
+- **NOAA CUDEM.** Amante, C. J., et al. (2023). Continuously Updated Digital
+  Elevation Models (CUDEMs) to Support Coastal Inundation Modeling.
+  *Remote Sensing, 15*, 1702. https://doi.org/10.3390/rs15061702
+- **GEBCO 2024 Grid.** GEBCO Compilation Group (2024).
+  https://doi.org/10.5285/1c44ce99-0a0d-5f4f-e063-7086abc0ea0f
+- **ESA WorldCover 2021 v200.** Zanaga, D., et al. (2022).
+  https://doi.org/10.5281/zenodo.7254221. Map attribution: © ESA WorldCover
+  project 2021 / Contains modified Copernicus Sentinel data (2021) processed by
+  the ESA WorldCover consortium.
+- **GCN250.** Jaafar, H. H., and Ahmad, F. A. (2019), global curve-number data.
+  Article: https://doi.org/10.1038/s41597-019-0155-x; dataset:
+  https://doi.org/10.6084/m9.figshare.7756202.v1
+- **USGS streamflow.** U.S. Geological Survey National Water Information
+  System/API data. Cite the individual station records and access dates used in
+  a rerun: https://waterdata.usgs.gov/
+
+## Additional model inputs and comparison resources
+
+The notebooks also use or reference GLORYS ocean reanalysis, TPXO tides,
+NOAA CORA, and GEBCO bathymetry supplied through NCAR/CrocoDash workflows.
+When those products are reused, cite the exact product versions and the access
+records generated by the corresponding notebook.
+
+## Licenses
+
+The repository's code license does not override third-party software or data
+terms. The large SFINCS archive is a research artifact assembled from multiple
+sources; retain this file and its provenance records when redistributing or
+deriving products from it.

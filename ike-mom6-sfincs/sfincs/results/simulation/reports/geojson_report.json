@@ -1,0 +1,24 @@
+{
+  "auto_utm_epsg": 32615,
+  "bbox": [
+    -95.45891178999995,
+    28.955868372000054,
+    -94.44087976999998,
+    29.96099503100004
+  ],
+  "bnd_points_path": "/home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/geospatial/vectors/boundary_forcing_points.geojson",
+  "centroid_lonlat": [
+    -94.96714846502839,
+    29.47610974104339
+  ],
+  "domain_path": "/home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/geospatial/vectors/domain.geojson",
+  "n_boundary_points": 7,
+  "n_observation_points": 0,
+  "n_river_points": 0,
+  "n_roughness_overrides": 0,
+  "observation_points_path": "",
+  "ocean_path": "/home/fmaghsoodifar/SFINCS-MOM6/AutoCF-1.0.0-HPC/AutoCF_release_v1.0.0/runs/galv_ike2008_noaa_sg/data/geospatial/vectors/ocean_bc_line.geojson",
+  "river_points_path": "",
+  "role_schema_used": true,
+  "roughness_overrides_path": ""
+}

@@ -46,7 +46,9 @@ official citation should replace the provisional wording above.
   https://github.com/NOAA-GFDL/MOM6
 - **CrocoDash and CROCODILE.** CROCODILE-CESM regional MOM6 workflow software:
   https://github.com/CROCODILE-CESM/CrocoDash and
-  https://github.com/CROCODILE-CESM
+  https://github.com/CROCODILE-CESM. The CrocoDash `CITATION.cff` credits
+  Manish Venumuddula, Alper Altuntas, Mike Levy, Aidan Janney, Andrew Kwong,
+  and Nguyen Hung.
 - **CESM/CIME and CDEPS.** Community Earth System Model infrastructure:
   https://github.com/ESCOMP/CESM
 - **Python analysis stack.** Jupyter, xarray, NumPy, pandas, SciPy, Matplotlib,

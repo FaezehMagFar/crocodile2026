@@ -7,7 +7,19 @@ workflow for Hurricane Ike (2008). It combines ERA5 atmospheric forcing,
 CrocoDash/CESM regional MOM6, SFINCS for Galveston Bay, NOAA observations, and
 Copernicus DUACS sea-level data.
 
-## Animated result
+## Animated results
+
+### SFINCS flood inundation
+
+![SFINCS Hurricane Ike flood-inundation animation](ike-mom6-sfincs/figures/sfincs_ike_flood_animation.gif)
+
+The SFINCS animation covers 2008-09-08 through 2008-09-16 and displays every
+third hourly output, with the exact 2008-09-13 07:00 UTC landfall frame added.
+Flood depth is shown only where an initially dry model cell subsequently has at
+least 0.05 m of water. The reproducible generator is
+[`create_sfincs_flood_animation.py`](ike-mom6-sfincs/scripts/create_sfincs_flood_animation.py).
+
+### MOM6 and Copernicus sea level
 
 The animation below was extracted from the project presentation so that it
 plays directly on GitHub. The Copernicus product is daily, so the frame for
@@ -31,13 +43,6 @@ An additional MOM6 sea-surface-height animation is available
   [SFINCS evaluation products](ike-mom6-sfincs/sfincs/results)
 - [Credits and citations](ike-mom6-sfincs/CREDITS_AND_CITATIONS.md), including
   special credit for AutoCF v1.0.0 HPC.
-
-## Time-coordinate note
-
-The MOM6 numeric time values follow the proleptic Gregorian calendar, although
-the source metadata labels the calendar as `gregorian`. The notebooks change
-only the calendar metadata before CF decoding. They do **not** numerically add
-two days. This places the Hurricane Ike peak on 2008-09-13 as intended.
 
 ## Downloading the large SFINCS archive
 
@@ -63,10 +68,81 @@ Large duplicate archives, software installers, recordings, temporary build
 folders, the 7.3 GiB ERA5 working file, and unrelated workshop materials are
 intentionally excluded.
 
-## Attribution
+## Credits and references
 
-AutoCF v1.0.0 HPC was used to build, run, and evaluate the packaged SFINCS
-case. AutoCF itself is not redistributed here. All model, software, and data
-providers retain their own authorship, licenses, and citation requirements.
-See [Credits and citations](ike-mom6-sfincs/CREDITS_AND_CITATIONS.md) before
-reusing the material.
+**Project author:** Faezeh Maghsoodifar, The University of Alabama.
+
+Third-party names and references below acknowledge the software and data used
+by this workflow and do not imply endorsement of this project.
+
+### AutoCF
+
+**AutoCF v1.0.0 HPC release** was used to automate the Galveston Bay SFINCS
+model build, execute the GPU run, prepare forcing and terrain inputs, and
+create evaluation and provenance products. AutoCF executables, compiled
+modules, containers, and installers are not redistributed here. The available
+release did not provide a public bibliographic citation, so it is identified as:
+
+> AutoCF, version 1.0.0 HPC release (2026), computer software used for SFINCS
+> model construction, execution, evaluation, and provenance generation.
+
+### Modeling and workflow software
+
+- **SFINCS (Deltares):** Leijnse, T., van Ormondt, M., Nederhoff, K., and van
+  Dongeren, A. (2021). Modeling compound flooding in coastal systems using a
+  computationally efficient reduced-physics solver. *Coastal Engineering,
+  163*, 103796. [https://doi.org/10.1016/j.coastaleng.2020.103796](https://doi.org/10.1016/j.coastaleng.2020.103796)
+- **HydroMT:** Eilander, D., et al. (2023). HydroMT: Automated and reproducible
+  model building and analysis. *Journal of Open Source Software, 8*(83), 4897.
+  [https://doi.org/10.21105/joss.04897](https://doi.org/10.21105/joss.04897)
+- **HydroMT-SFINCS:** [Deltares HydroMT plugin for SFINCS](https://github.com/Deltares/hydromt_sfincs)
+- **MOM6:** [NOAA-GFDL Modular Ocean Model 6](https://github.com/NOAA-GFDL/MOM6)
+- **CrocoDash and CROCODILE:** [CrocoDash](https://github.com/CROCODILE-CESM/CrocoDash)
+  and the [CROCODILE-CESM organization](https://github.com/CROCODILE-CESM).
+  The official CrocoDash
+  [`CITATION.cff`](https://github.com/CROCODILE-CESM/CrocoDash/blob/main/CITATION.cff)
+  credits **Manish Venumuddula, Alper Altuntas, Mike Levy, Aidan Janney,
+  Andrew Kwong, and Nguyen Hung**.
+- **CESM/CIME and CDEPS:** [Community Earth System Model infrastructure](https://github.com/ESCOMP/CESM)
+- **Python tools:** Jupyter, xarray, NumPy, pandas, SciPy, Matplotlib, Cartopy,
+  netCDF4, cftime, Pillow, and the Copernicus Marine Toolbox.
+
+### Atmospheric, ocean, terrain, and land-surface data
+
+- **ERA5:** Hersbach, H., et al. (2020). The ERA5 global reanalysis.
+  *Quarterly Journal of the Royal Meteorological Society, 146*(730), 1999–2049.
+  [Article](https://doi.org/10.1002/qj.3803) and
+  [hourly single-level data](https://doi.org/10.24381/cds.adbb2d47)
+- **Copernicus DUACS sea level:** *Global Ocean Gridded L4 Sea Surface Heights
+  and Derived Variables Reprocessed Copernicus Climate Service*, product
+  `SEALEVEL_GLO_PHY_CLIMATE_L4_MY_008_057`, dataset
+  `c3s_obs-sl_glo_phy-ssh_my_twosat-l4-duacs-0.25deg_P1D`.
+  [Product reference](https://doi.org/10.48670/moi-00145)
+- **NOAA Analysis of Record for Calibration (AORC) v1.1:** Fall, G., et al.
+  (2023). [Dataset description and precipitation evaluation](https://doi.org/10.1111/1752-1688.13143)
+- **NOAA CO-OPS water levels:** Center for Operational Oceanographic Products
+  and Services (2018), NOAA NCEI.
+  [Dataset reference](https://doi.org/10.25921/dt9g-2p60)
+- **NOAA CUDEM:** Amante, C. J., et al. (2023). Continuously Updated Digital
+  Elevation Models to Support Coastal Inundation Modeling. *Remote Sensing,
+  15*, 1702. [Article](https://doi.org/10.3390/rs15061702)
+- **GEBCO 2024 Grid:** GEBCO Compilation Group (2024).
+  [Dataset reference](https://doi.org/10.5285/1c44ce99-0a0d-5f4f-e063-7086abc0ea0f)
+- **ESA WorldCover 2021 v200:** Zanaga, D., et al. (2022).
+  [Dataset reference](https://doi.org/10.5281/zenodo.7254221). Map attribution:
+  © ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data
+  (2021) processed by the ESA WorldCover consortium.
+- **GCN250:** Jaafar, H. H., and Ahmad, F. A. (2019), global curve-number data.
+  [Article](https://doi.org/10.1038/s41597-019-0155-x) and
+  [dataset](https://doi.org/10.6084/m9.figshare.7756202.v1)
+- **USGS streamflow:** U.S. Geological Survey National Water Information
+  System/API data. [USGS Water Data](https://waterdata.usgs.gov/)
+
+The notebooks also use or reference GLORYS ocean reanalysis, TPXO tides, NOAA
+CORA, and GEBCO bathymetry supplied through NCAR/CrocoDash workflows. Exact
+versions and access records should be retained when those products are reused.
+
+Third-party datasets and software retain their own licenses and citation
+requirements. The repository license does not replace those terms. A duplicate
+copy of these acknowledgments is retained in
+[CREDITS_AND_CITATIONS.md](ike-mom6-sfincs/CREDITS_AND_CITATIONS.md).

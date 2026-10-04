@@ -7,6 +7,27 @@ This directory contains the curated research materials for the Hurricane Ike
 
 ## Results
 
+### SFINCS flood inundation
+
+![SFINCS Hurricane Ike flood-inundation animation](figures/sfincs_ike_flood_animation.gif)
+
+This animation is generated from the hourly `sfincs_map.nc` output. It shows
+`zs - zb` on model cells that were dry at the first output time and later had a
+water depth of at least 0.05 m. Every third hourly frame is displayed, and the
+exact 2008-09-13 07:00 UTC Ike landfall frame is included.
+
+To reproduce it after extracting the SFINCS model archive:
+
+```bash
+python scripts/create_sfincs_flood_animation.py \
+  /path/to/SFINCS_Model/galv_ike2008_/data/model/main/sfincs_map.nc \
+  --output figures/sfincs_ike_flood_animation.gif
+```
+
+Required Python packages are `numpy`, `matplotlib`, `netCDF4`, and `Pillow`.
+
+### MOM6 and Copernicus sea level
+
 ![MOM6 and Copernicus DUACS daily sea-level comparison](figures/presentation_mom6_copernicus_animation.gif)
 
 The comparison uses daily Copernicus DUACS fields. The 2008-09-13 frame is the
@@ -32,14 +53,6 @@ Key outputs:
 
 The notebooks retain NCAR and UAHPC paths from the recorded runs. Adapt paths,
 project codes, and environments before execution.
-
-## MOM6 time decoding
-
-The numeric time values follow the proleptic Gregorian calendar even though
-the source files label the coordinate as `gregorian`. The loader opens files
-with `decode_times=False`, changes the calendar attribute to
-`proleptic_gregorian`, and then applies CF decoding. The numeric time values are
-not shifted.
 
 ## Contents
 

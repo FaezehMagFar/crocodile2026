@@ -92,7 +92,6 @@ All files use Unix line endings, the YAML parses, and the scripts pass `bash -n`
   - W is a calm window before the storm.
   - η̄(W) is MOM6's mean over the same window.
   - η is MOM6 `SSH` or `SSH_inst`, **never `zos`**: `zos` adds p_atm/ρg and removes the domain mean.
-  - **Time axis:** MOM6 files say `days since 0001-01-01`, calendar `gregorian`, but count in proleptic Gregorian. Plain `xr.open_dataset` therefore puts every 2008 time **2 days early** (checked on `SFINCS_OCB_Input/gom12_ike_ERA5full.001.mom6.sfincs_TX.nc`: 08-28→09-18 instead of 08-30→09-20; Ike peak looks like 09-11 instead of 09-13 ~10 UTC). Always open with `decode_times=False`, set `time.attrs["calendar"]="proleptic_gregorian"`, then `xr.decode_cf` (as `open_mom6` in `ike.ipynb` / `SFINCS_MOM6_ready_files.ipynb`). The `first_time`/`last_time` in that folder's `manifest.json` were written before the fix and are 2 days early.
 - **Pressure effect:** MOM6 η already includes the inverse barometer, so keep `pavbnd = 0`. Check that AutoCF's `sfincs.inp` doesn't set `pavbnd > 0` for Run B.
 - **Scoring:** leave out the NOAA stations AutoCF used to force Run A's boundary. They match Run A almost by construction. Score at bay-interior gauges instead: Eagle Point, Morgans Point, Manchester, Galveston Railroad Bridge.
 - **Gauge IDs** (from memory, unverified): Pier 21 8771450, Bay Entrance N Jetty 8771341, Eagle Point 8771013, Morgans Point 8770613, Manchester 8770777, RR Bridge 8771486, San Luis Pass 8771972, Rollover Pass 8770971.

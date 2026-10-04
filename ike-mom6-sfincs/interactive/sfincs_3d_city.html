@@ -56,6 +56,8 @@
       gap: 7px;
     }
 
+    .controls[hidden] { display: none; }
+
     button, .toggle {
       min-height: 34px;
       border: 1px solid rgba(255, 255, 255, 0.2);
@@ -163,16 +165,34 @@
 
     const config = window.SFINCS_3D_CONFIG || null;
     const statusNode = document.getElementById("status");
+    const query = new URLSearchParams(window.location.search);
+    const captureMode = query.get("capture") === "1";
+    const captureFrame = Number.parseInt(query.get("frame") || "0", 10);
+    const captureFrames = Math.max(1, Number.parseInt(query.get("frames") || "1", 10));
+    const orbitPosition = captureFrame / captureFrames;
 
     const views = {
       city: { center: [-94.7972, 29.3019], zoom: 15.25, pitch: 69, bearing: 27 },
       bay: { center: [-94.865, 29.405], zoom: 10.75, pitch: 54, bearing: 18 }
     };
 
+    if (captureMode) {
+      views.bay.center = [-94.94, 29.47];
+      views.bay.bearing = 18 + 360 * orbitPosition;
+      views.bay.pitch = 52 + 3 * Math.sin(orbitPosition * Math.PI * 2);
+      views.bay.zoom = 10.15 + 0.08 * Math.cos(orbitPosition * Math.PI * 2);
+      document.querySelector(".controls").hidden = true;
+      document.querySelector("h1").textContent = "Hurricane Ike Flooding — 3D Galveston Bay";
+      document.querySelector(".subtitle").textContent =
+        "Full-bay SFINCS flood depth over satellite imagery with 3× terrain exaggeration.";
+    }
+
+    const initialView = captureMode ? views.bay : views.city;
+
     const map = new maplibregl.Map({
       container: "map",
       style: "https://tiles.openfreemap.org/styles/liberty",
-      ...views.city,
+      ...initialView,
       antialias: true,
       maxPitch: 85,
       attributionControl: false
@@ -186,6 +206,7 @@
       customAttribution: [
         "SFINCS flood model",
         "Satellite: Esri, Vantor, Earthstar Geographics, GIS User Community",
+        "Terrain: © Mapterhorn",
         "© OpenStreetMap contributors · OpenFreeMap"
       ]
     }), "bottom-left");
@@ -208,6 +229,31 @@
         source: "esri-satellite",
         paint: { "raster-saturation": -0.08, "raster-contrast": 0.06 }
       }, firstLineOrSymbol);
+
+      const terrainExaggeration = captureMode ? 3 : 1.5;
+      map.addSource("terrain-dem", {
+        type: "raster-dem",
+        url: "https://tiles.mapterhorn.com/tilejson.json",
+        tileSize: 512,
+        encoding: "terrarium",
+        attribution: "© Mapterhorn"
+      });
+      map.setTerrain({ source: "terrain-dem", exaggeration: terrainExaggeration });
+      map.addLayer({
+        id: "terrain-hillshade",
+        type: "hillshade",
+        source: "terrain-dem",
+        paint: {
+          "hillshade-exaggeration": 0.42,
+          "hillshade-shadow-color": "#12202a",
+          "hillshade-highlight-color": "#f1e4c7",
+          "hillshade-accent-color": "#54684f"
+        }
+      }, firstLineOrSymbol);
+      map.addControl(new maplibregl.TerrainControl({
+        source: "terrain-dem",
+        exaggeration: terrainExaggeration
+      }), "top-right");
 
       if (config) {
         map.addSource("sfincs-flood", {
@@ -255,7 +301,7 @@
       }, firstSymbol);
 
       if (config) {
-        statusNode.textContent = `Model grid: ${config.floodedCells.toLocaleString()} newly inundated cells · display capped at ${config.displayMaximumM} m`;
+        statusNode.textContent = `Model grid: ${config.floodedCells.toLocaleString()} newly inundated cells · depth capped at ${config.displayMaximumM} m · terrain ${terrainExaggeration}×`;
       } else {
         statusNode.textContent = "3D city loaded · generate the SFINCS overlay with the included asset script";
         document.getElementById("flood-toggle").disabled = true;

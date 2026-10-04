@@ -4,6 +4,7 @@ This browser map combines:
 
 - Esri World Imagery satellite tiles;
 - OpenStreetMap building footprints and mapped heights delivered by OpenFreeMap;
+- Mapterhorn elevation tiles for the 3-D terrain surface and hillshade;
 - MapLibre GL JS building extrusion; and
 - the maximum newly inundated depth from the SFINCS Hurricane Ike run.
 
@@ -23,3 +24,5 @@ Open `http://localhost:8000/ike-mom6-sfincs/interactive/sfincs_3d_city.html`.
 
 The map does not require a paid map token. Buildings without a mapped height use
 an 8 m display fallback; their footprints still come from OpenStreetMap.
+The full-bay GIF uses 3× vertical terrain exaggeration because the Galveston Bay
+coast is naturally very flat; the interactive map uses 1.5× by default.

@@ -29,15 +29,6 @@ third hourly output, with the exact 2008-09-13 07:00 UTC landfall frame added.
 Flood depth is shown only where an initially dry model cell subsequently has at
 least 0.05 m of water, over an Esri satellite-hybrid basemap.
 
-### SFINCS 3D model view
-
-![SFINCS Hurricane Ike 3D flood-inundation view](ike-mom6-sfincs/figures/sfincs_ike_flood_3d.png)
-
-The 3D view drapes the satellite-hybrid imagery over the SFINCS bed-elevation
-surface and overlays the maximum depth reached on initially dry cells. The
-vertical scale is exaggerated to make the coastal terrain and water surface
-visible.
-
 ## Main project files
 
 - [Project presentation](Presentation.pptx) — download

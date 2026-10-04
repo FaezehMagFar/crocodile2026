@@ -7,6 +7,13 @@ This directory contains the curated research materials for the Hurricane Ike
 
 ## Results
 
+### ERA5–MOM6 and Copernicus sea level
+
+![MOM6 and Copernicus DUACS daily sea-level comparison](figures/presentation_mom6_copernicus_animation.gif)
+
+The comparison uses daily Copernicus DUACS fields. The 2008-09-13 frame is the
+landfall-day mean, not an observation at the exact landfall hour.
+
 ### SFINCS flood inundation
 
 ![SFINCS Hurricane Ike flood-inundation animation](figures/sfincs_ike_flood_animation.gif)
@@ -14,28 +21,14 @@ This directory contains the curated research materials for the Hurricane Ike
 This animation is generated from the hourly `sfincs_map.nc` output. It shows
 `zs - zb` on model cells that were dry at the first output time and later had a
 water depth of at least 0.05 m. Every third hourly frame is displayed, and the
-exact 2008-09-13 07:00 UTC Ike landfall frame is included.
-
-To reproduce it after extracting the SFINCS model archive:
-
-```bash
-python scripts/create_sfincs_flood_animation.py \
-  /path/to/SFINCS_Model/galv_ike2008_/data/model/main/sfincs_map.nc \
-  --output figures/sfincs_ike_flood_animation.gif
-```
-
-Required Python packages are `numpy`, `matplotlib`, `netCDF4`, and `Pillow`.
-
-### MOM6 and Copernicus sea level
-
-![MOM6 and Copernicus DUACS daily sea-level comparison](figures/presentation_mom6_copernicus_animation.gif)
-
-The comparison uses daily Copernicus DUACS fields. The 2008-09-13 frame is the
-landfall-day mean, not an observation at the exact landfall hour.
+exact 2008-09-13 07:00 UTC Ike landfall frame is included. Esri World Imagery
+and the World Boundaries and Places reference layer provide the
+satellite-hybrid basemap.
 
 Key outputs:
 
-- `slides/Presentation.pptx` — complete presentation with embedded media.
+- [`Presentation.pptx`](../Presentation.pptx) — complete presentation with
+  embedded media, stored at the repository root.
 - `figures/` — static figures and GitHub-playable GIF animations.
 - `sfincs/results/` — compact evaluation figures, tables, and provenance.
 - `sfincs/archive/SFINCS_Model_Galveston_Ike_2008.zip` — complete SFINCS model
@@ -61,7 +54,7 @@ project codes, and environments before execution.
 - `scripts/` — supporting validation and comparison utilities.
 - `docs/` — experiment design, investigation notes, and execution records.
 - `figures/` — publication and presentation graphics.
-- `slides/` — the final PowerPoint presentation.
+- `../Presentation.pptx` — the final PowerPoint presentation at repository root.
 - `sfincs/` — lightweight configuration/evaluation records plus the LFS model
   archive.
 

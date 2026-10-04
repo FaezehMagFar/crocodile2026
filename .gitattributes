@@ -1,2 +1,2 @@
 ike-mom6-sfincs/sfincs/archive/SFINCS_Model_Galveston_Ike_2008.zip filter=lfs diff=lfs merge=lfs -text
-ike-mom6-sfincs/slides/Presentation.pptx filter=lfs diff=lfs merge=lfs -text
+Presentation.pptx filter=lfs diff=lfs merge=lfs -text

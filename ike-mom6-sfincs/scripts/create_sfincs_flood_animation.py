@@ -18,9 +18,12 @@ matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.colors import LightSource, LinearSegmentedColormap
+import contextily as cx
+from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.ticker import FuncFormatter
 from netCDF4 import Dataset, num2date
 from PIL import Image
+from xyzservices import TileProvider
 
 
 IKE_LANDFALL = datetime(2008, 9, 13, 7, 0)
@@ -139,44 +142,34 @@ def main() -> None:
             corner_x = np.ma.filled(dataset.variables["corner_x"][:], np.nan)
             corner_y = np.ma.filled(dataset.variables["corner_y"][:], np.nan)
             extent = [
-                np.nanmin(corner_x) / 1000.0,
-                np.nanmax(corner_x) / 1000.0,
-                np.nanmin(corner_y) / 1000.0,
-                np.nanmax(corner_y) / 1000.0,
+                np.nanmin(corner_x),
+                np.nanmax(corner_x),
+                np.nanmin(corner_y),
+                np.nanmax(corner_y),
             ]
         else:
             extent = [
-                np.nanmin(x) / 1000.0,
-                np.nanmax(x) / 1000.0,
-                np.nanmin(y) / 1000.0,
-                np.nanmax(y) / 1000.0,
+                np.nanmin(x),
+                np.nanmax(x),
+                np.nanmin(y),
+                np.nanmax(y),
             ]
 
-        # A subdued shaded-relief layer gives geographic context without an
-        # online basemap and keeps the animation completely reproducible.
-        terrain = np.where(active, np.clip(bed, -8.0, 20.0), np.nan)
-        relief_source = LightSource(azdeg=315, altdeg=45)
-        relief = relief_source.shade(
-            np.nan_to_num(terrain, nan=-8.0),
-            cmap=plt.get_cmap("gist_earth"),
-            vert_exag=0.7,
-            blend_mode="soft",
-        )
-        relief[~active, 3] = 0.0
-        existing_water = np.where(initial_wet, 1.0, np.nan)
-
-        fig, axis = plt.subplots(figsize=(7.2, 6.9), dpi=100)
+        fig, axis = plt.subplots(figsize=(6.8, 6.5), dpi=100)
         fig.subplots_adjust(left=0.105, right=0.87, bottom=0.105, top=0.89)
-        axis.imshow(relief, origin="lower", extent=extent, interpolation="nearest")
-        axis.imshow(
-            existing_water,
-            origin="lower",
-            extent=extent,
-            cmap="Blues",
-            vmin=0.0,
-            vmax=1.0,
-            alpha=0.30,
-            interpolation="nearest",
+        axis.set_xlim(extent[0], extent[1])
+        axis.set_ylim(extent[2], extent[3])
+
+        # Esri imagery plus its transparent reference layer creates the
+        # satellite-hybrid background. The map is fetched once and reused for
+        # all GIF frames.
+        cx.add_basemap(
+            axis,
+            source=cx.providers.Esri.WorldImagery,
+            crs="EPSG:32615",
+            zoom=10,
+            reset_extent=True,
+            attribution=False,
         )
         flood_colormap = LinearSegmentedColormap.from_list(
             "sfincs_flood",
@@ -189,7 +182,30 @@ def main() -> None:
             cmap=flood_colormap,
             vmin=args.minimum_depth,
             vmax=args.maximum_depth,
+            alpha=0.88,
             interpolation="nearest",
+            zorder=3,
+        )
+
+        reference_tiles = TileProvider(
+            name="Esri.WorldBoundariesAndPlaces",
+            url=(
+                "https://services.arcgisonline.com/ArcGIS/rest/services/"
+                "Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}"
+            ),
+            attribution=(
+                "Esri, HERE, Garmin, (C) OpenStreetMap contributors, "
+                "and the GIS user community"
+            ),
+        )
+        cx.add_basemap(
+            axis,
+            source=reference_tiles,
+            crs="EPSG:32615",
+            zoom=10,
+            reset_extent=True,
+            attribution=False,
+            zorder=4,
         )
 
         colorbar = fig.colorbar(
@@ -204,6 +220,8 @@ def main() -> None:
 
         axis.set_xlabel("Easting (km), WGS 84 / UTM zone 15N")
         axis.set_ylabel("Northing (km), WGS 84 / UTM zone 15N")
+        axis.xaxis.set_major_formatter(FuncFormatter(lambda value, _: f"{value / 1000:.0f}"))
+        axis.yaxis.set_major_formatter(FuncFormatter(lambda value, _: f"{value / 1000:.0f}"))
         axis.set_aspect("equal", adjustable="box")
         axis.grid(color="white", alpha=0.22, linewidth=0.6)
         axis.tick_params(labelsize=9)
@@ -237,6 +255,21 @@ def main() -> None:
             color="#102a43",
             bbox={"facecolor": "white", "alpha": 0.82, "edgecolor": "none", "pad": 3},
         )
+        axis.text(
+            0.99,
+            0.99,
+            (
+                "Imagery: Esri, Vantor, Earthstar Geographics, GIS User Community\n"
+                "Reference: Esri, HERE, Garmin, © OpenStreetMap contributors"
+            ),
+            transform=axis.transAxes,
+            ha="right",
+            va="top",
+            fontsize=5.2,
+            color="white",
+            zorder=6,
+            bbox={"facecolor": "black", "alpha": 0.62, "edgecolor": "none", "pad": 2},
+        )
 
         frames: list[Image.Image] = []
         durations: list[int] = []
@@ -262,7 +295,7 @@ def main() -> None:
             fig.canvas.draw()
             rgba = np.asarray(fig.canvas.buffer_rgba()).copy()
             frame = Image.fromarray(rgba, mode="RGBA").convert("RGB")
-            frame = frame.quantize(colors=96, method=Image.Quantize.MEDIANCUT)
+            frame = frame.quantize(colors=72, method=Image.Quantize.MEDIANCUT)
             frames.append(frame)
 
             if index == landfall_index:

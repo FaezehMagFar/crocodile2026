@@ -9,17 +9,7 @@ Copernicus DUACS sea-level data.
 
 ## Animated results
 
-### SFINCS flood inundation
-
-![SFINCS Hurricane Ike flood-inundation animation](ike-mom6-sfincs/figures/sfincs_ike_flood_animation.gif)
-
-The SFINCS animation covers 2008-09-08 through 2008-09-16 and displays every
-third hourly output, with the exact 2008-09-13 07:00 UTC landfall frame added.
-Flood depth is shown only where an initially dry model cell subsequently has at
-least 0.05 m of water. The reproducible generator is
-[`create_sfincs_flood_animation.py`](ike-mom6-sfincs/scripts/create_sfincs_flood_animation.py).
-
-### MOM6 and Copernicus sea level
+### ERA5–MOM6 and Copernicus sea level
 
 The animation below was extracted from the project presentation so that it
 plays directly on GitHub. The Copernicus product is daily, so the frame for
@@ -30,9 +20,18 @@ plays directly on GitHub. The Copernicus product is daily, so the frame for
 An additional MOM6 sea-surface-height animation is available
 [here](ike-mom6-sfincs/figures/gom12_ike_ERA5full.001_ssh_ike.gif).
 
+### SFINCS flood inundation
+
+![SFINCS Hurricane Ike flood-inundation animation](ike-mom6-sfincs/figures/sfincs_ike_flood_animation.gif)
+
+The SFINCS animation covers 2008-09-08 through 2008-09-16 and displays every
+third hourly output, with the exact 2008-09-13 07:00 UTC landfall frame added.
+Flood depth is shown only where an initially dry model cell subsequently has at
+least 0.05 m of water, over an Esri satellite-hybrid basemap.
+
 ## Main project files
 
-- [Project presentation](ike-mom6-sfincs/slides/Presentation.pptx) — download
+- [Project presentation](Presentation.pptx) — download
   the PowerPoint to view all embedded slide media and animations.
 - [Main ERA5–MOM6 notebook](ike-mom6-sfincs/notebooks/ike_era5_full_crocodash.ipynb)
 - [MOM6 products for SFINCS notebook](ike-mom6-sfincs/notebooks/SFINCS_MOM6_ready_files.ipynb)
@@ -105,7 +104,8 @@ release did not provide a public bibliographic citation, so it is identified as:
   Andrew Kwong, and Nguyen Hung**.
 - **CESM/CIME and CDEPS:** [Community Earth System Model infrastructure](https://github.com/ESCOMP/CESM)
 - **Python tools:** Jupyter, xarray, NumPy, pandas, SciPy, Matplotlib, Cartopy,
-  netCDF4, cftime, Pillow, and the Copernicus Marine Toolbox.
+  contextily, xyzservices, netCDF4, cftime, Pillow, and the Copernicus Marine
+  Toolbox.
 
 ### Atmospheric, ocean, terrain, and land-surface data
 
@@ -137,6 +137,13 @@ release did not provide a public bibliographic citation, so it is identified as:
   [dataset](https://doi.org/10.6084/m9.figshare.7756202.v1)
 - **USGS streamflow:** U.S. Geological Survey National Water Information
   System/API data. [USGS Water Data](https://waterdata.usgs.gov/)
+- **Satellite-hybrid basemap:**
+  [Esri World Imagery](https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer)
+  with the
+  [World Boundaries and Places reference layer](https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer).
+  Imagery source: Esri, Vantor, Earthstar Geographics, and the GIS User
+  Community. Reference source: Esri, HERE, Garmin, © OpenStreetMap
+  contributors, and the GIS user community.
 
 The notebooks also use or reference GLORYS ocean reanalysis, TPXO tides, NOAA
 CORA, and GEBCO bathymetry supplied through NCAR/CrocoDash workflows. Exact

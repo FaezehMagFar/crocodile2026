@@ -36,6 +36,18 @@ third hourly output, with the exact 2008-09-13 07:00 UTC landfall frame added.
 Flood depth is shown only where an initially dry model cell subsequently has at
 least 0.05 m of water, over an Esri satellite-hybrid basemap.
 
+### Interactive 3D Galveston city view
+
+The [interactive 3D map](ike-mom6-sfincs/interactive/sfincs_3d_city.html)
+places the SFINCS maximum newly inundated depth over Esri satellite imagery and
+extrudes real OpenStreetMap building footprints using mapped building heights.
+It includes close Galveston-city and wider Galveston-Bay camera views. Download
+or clone the repository and follow the short
+[launch instructions](ike-mom6-sfincs/interactive/README.md) to explore it in a
+browser.
+
+[![Interactive 3D SFINCS flood map over Galveston](ike-mom6-sfincs/figures/sfincs_3d_galveston_preview.png)](ike-mom6-sfincs/interactive/sfincs_3d_city.html)
+
 ## Main project files
 
 - [Project presentation](Presentation.pptx) — download
@@ -47,6 +59,7 @@ least 0.05 m of water, over an Esri satellite-hybrid basemap.
 - [SFINCS archive notes and checksum](ike-mom6-sfincs/sfincs/archive/README.md)
 - [Figures](ike-mom6-sfincs/figures) and
   [SFINCS evaluation products](ike-mom6-sfincs/sfincs/results)
+- [Interactive 3D Galveston city map](ike-mom6-sfincs/interactive/sfincs_3d_city.html)
 - [Credits and citations](ike-mom6-sfincs/CREDITS_AND_CITATIONS.md), including
   special credit for AutoCF v1.0.0 HPC.
 
@@ -113,6 +126,8 @@ release did not provide a public bibliographic citation, so it is identified as:
 - **Python tools:** Jupyter, xarray, NumPy, pandas, SciPy, Matplotlib, Cartopy,
   contextily, xyzservices, netCDF4, cftime, Pillow, and the Copernicus Marine
   Toolbox.
+- **Interactive 3D map:** [MapLibre GL JS](https://maplibre.org/maplibre-gl-js/docs/),
+  [OpenFreeMap](https://openfreemap.org/), and © OpenStreetMap contributors.
 
 ### Atmospheric, ocean, terrain, and land-surface data
 

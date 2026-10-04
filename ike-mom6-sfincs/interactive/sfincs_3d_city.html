@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SFINCS Hurricane Ike — 3D Galveston City View</title>
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.12.0/dist/maplibre-gl.css">
+  <script src="sfincs_3d_city_config.js"></script>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body, #map {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+
+    body { background: #08141d; }
+
+    .panel {
+      position: absolute;
+      z-index: 5;
+      top: 18px;
+      left: 18px;
+      width: min(390px, calc(100vw - 36px));
+      padding: 16px 17px 15px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 14px;
+      background: rgba(5, 17, 26, 0.86);
+      box-shadow: 0 12px 42px rgba(0, 0, 0, 0.34);
+      backdrop-filter: blur(12px);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(18px, 2.2vw, 25px);
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      margin: 7px 0 13px;
+      color: #bdd0dc;
+      font-size: 12.5px;
+      line-height: 1.45;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    button, .toggle {
+      min-height: 34px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 9px;
+      color: #f3f8fb;
+      background: rgba(255, 255, 255, 0.09);
+      font: inherit;
+      font-size: 12px;
+    }
+
+    button {
+      padding: 7px 11px;
+      cursor: pointer;
+    }
+
+    button:hover { background: rgba(255, 255, 255, 0.17); }
+
+    .toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 10px;
+      user-select: none;
+    }
+
+    input { accent-color: #56bfe4; }
+
+    .legend {
+      position: absolute;
+      z-index: 5;
+      right: 18px;
+      bottom: 28px;
+      width: 212px;
+      padding: 11px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 11px;
+      background: rgba(5, 17, 26, 0.83);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.28);
+      backdrop-filter: blur(10px);
+      font-size: 11px;
+    }
+
+    .legend-title {
+      margin-bottom: 7px;
+      color: #f3f8fb;
+      font-weight: 650;
+    }
+
+    .ramp {
+      height: 10px;
+      border-radius: 6px;
+      background: linear-gradient(90deg, #65c9e8, #2e9cc5, #176c9c, #16456f, #33145f);
+    }
+
+    .ticks {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 4px;
+      color: #c7d6df;
+    }
+
+    .status {
+      margin-top: 10px;
+      color: #89a5b5;
+      font-size: 11px;
+    }
+
+    .maplibregl-ctrl-attrib {
+      color: #10202a;
+      background: rgba(255, 255, 255, 0.82) !important;
+    }
+
+    @media (max-width: 640px) {
+      .panel { top: 10px; left: 10px; width: calc(100vw - 20px); }
+      .legend { right: 10px; bottom: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="map" aria-label="Interactive 3D map of SFINCS flooding in Galveston"></div>
+
+  <section class="panel">
+    <h1>Hurricane Ike Flooding — 3D Galveston</h1>
+    <p class="subtitle">
+      SFINCS maximum newly inundated depth over satellite imagery and mapped city buildings.
+      Drag to pan, hold Ctrl while dragging to tilt, and scroll to zoom.
+    </p>
+    <div class="controls">
+      <button type="button" data-view="city">Galveston city</button>
+      <button type="button" data-view="bay">Galveston Bay</button>
+      <label class="toggle"><input id="flood-toggle" type="checkbox" checked> Flood depth</label>
+      <label class="toggle"><input id="buildings-toggle" type="checkbox" checked> 3D buildings</label>
+    </div>
+    <div class="status" id="status">Loading satellite map and buildings…</div>
+  </section>
+
+  <aside class="legend" id="legend">
+    <div class="legend-title">Maximum newly inundated depth (m)</div>
+    <div class="ramp"></div>
+    <div class="ticks"><span>0.05</span><span>0.5</span><span>1</span><span>2</span><span>3+</span></div>
+  </aside>
+
+  <script type="module">
+    import * as maplibregl from "https://unpkg.com/maplibre-gl@6.12.0/dist/maplibre-gl.mjs";
+
+    const config = window.SFINCS_3D_CONFIG || null;
+    const statusNode = document.getElementById("status");
+
+    const views = {
+      city: { center: [-94.7972, 29.3019], zoom: 15.25, pitch: 69, bearing: 27 },
+      bay: { center: [-94.865, 29.405], zoom: 10.75, pitch: 54, bearing: 18 }
+    };
+
+    const map = new maplibregl.Map({
+      container: "map",
+      style: "https://tiles.openfreemap.org/styles/liberty",
+      ...views.city,
+      antialias: true,
+      maxPitch: 85,
+      attributionControl: false
+    });
+    window.sfincsMap = map;
+
+    map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "top-right");
+    map.addControl(new maplibregl.FullscreenControl(), "top-right");
+    map.addControl(new maplibregl.AttributionControl({
+      compact: true,
+      customAttribution: [
+        "SFINCS flood model",
+        "Satellite: Esri, Vantor, Earthstar Geographics, GIS User Community",
+        "© OpenStreetMap contributors · OpenFreeMap"
+      ]
+    }), "bottom-left");
+
+    map.once("style.load", () => {
+      const styleLayers = map.getStyle().layers || [];
+      const firstLineOrSymbol = styleLayers.find(layer => layer.type === "line" || layer.type === "symbol")?.id;
+      const firstSymbol = styleLayers.find(layer => layer.type === "symbol")?.id;
+
+      map.addSource("esri-satellite", {
+        type: "raster",
+        tiles: ["https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"],
+        tileSize: 256,
+        maxzoom: 19,
+        attribution: "Source: Esri, Vantor, Earthstar Geographics, and the GIS User Community"
+      });
+      map.addLayer({
+        id: "esri-satellite",
+        type: "raster",
+        source: "esri-satellite",
+        paint: { "raster-saturation": -0.08, "raster-contrast": 0.06 }
+      }, firstLineOrSymbol);
+
+      if (config) {
+        map.addSource("sfincs-flood", {
+          type: "image",
+          url: config.floodImage,
+          coordinates: config.coordinates
+        });
+        map.addLayer({
+          id: "sfincs-flood",
+          type: "raster",
+          source: "sfincs-flood",
+          paint: { "raster-opacity": 0.78, "raster-fade-duration": 0 }
+        }, firstLineOrSymbol);
+      }
+
+      map.addSource("openfreemap-buildings", {
+        type: "vector",
+        url: "https://tiles.openfreemap.org/planet"
+      });
+      map.addLayer({
+        id: "3d-buildings",
+        source: "openfreemap-buildings",
+        "source-layer": "building",
+        type: "fill-extrusion",
+        minzoom: 14,
+        paint: {
+          "fill-extrusion-color": [
+            "interpolate", ["linear"],
+            ["to-number", ["coalesce", ["get", "render_height"], ["get", "height"]], 8],
+            0, "#c9d1d2",
+            12, "#e7d8bc",
+            40, "#e8b57c",
+            100, "#d6774b"
+          ],
+          "fill-extrusion-height": [
+            "interpolate", ["linear"], ["zoom"],
+            14, 0,
+            15.2, ["to-number", ["coalesce", ["get", "render_height"], ["get", "height"]], 8]
+          ],
+          "fill-extrusion-base": [
+            "to-number", ["coalesce", ["get", "render_min_height"], ["get", "min_height"]], 0
+          ],
+          "fill-extrusion-opacity": 0.92
+        }
+      }, firstSymbol);
+
+      if (config) {
+        statusNode.textContent = `Model grid: ${config.floodedCells.toLocaleString()} newly inundated cells · display capped at ${config.displayMaximumM} m`;
+      } else {
+        statusNode.textContent = "3D city loaded · generate the SFINCS overlay with the included asset script";
+        document.getElementById("flood-toggle").disabled = true;
+        document.getElementById("flood-toggle").checked = false;
+        document.getElementById("legend").hidden = true;
+      }
+    });
+
+    map.on("error", event => {
+      if (event.error) console.warn(event.error);
+    });
+
+    document.querySelectorAll("button[data-view]").forEach(button => {
+      button.addEventListener("click", () => {
+        map.easeTo({ ...views[button.dataset.view], duration: 1700 });
+      });
+    });
+
+    document.getElementById("flood-toggle").addEventListener("change", event => {
+      if (map.getLayer("sfincs-flood")) {
+        map.setLayoutProperty("sfincs-flood", "visibility", event.target.checked ? "visible" : "none");
+        document.getElementById("legend").hidden = !event.target.checked;
+      }
+    });
+
+    document.getElementById("buildings-toggle").addEventListener("change", event => {
+      if (map.getLayer("3d-buildings")) {
+        map.setLayoutProperty("3d-buildings", "visibility", event.target.checked ? "visible" : "none");
+      }
+    });
+
+    map.on("click", "3d-buildings", event => {
+      const properties = event.features?.[0]?.properties || {};
+      const height = properties.render_height || properties.height || "not mapped";
+      new maplibregl.Popup({ closeButton: false, offset: 8 })
+        .setLngLat(event.lngLat)
+        .setHTML(`<strong>Mapped building</strong><br>Height: ${height}${height === "not mapped" ? "" : " m"}`)
+        .addTo(map);
+    });
+
+    map.on("mouseenter", "3d-buildings", () => { map.getCanvas().style.cursor = "pointer"; });
+    map.on("mouseleave", "3d-buildings", () => { map.getCanvas().style.cursor = ""; });
+  </script>
+</body>
+</html>

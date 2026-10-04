@@ -63,7 +63,8 @@ project codes, and environments before execution.
 
 ## Attribution and reuse
 
-AutoCF v1.0.0 HPC was used to build, run, and evaluate the SFINCS case. The
-AutoCF software distribution is not included. See
-`CREDITS_AND_CITATIONS.md` for the full software and data acknowledgments.
-Third-party datasets and software retain their original licenses.
+[AutoCF v1.0.0 HPC](https://autocf.net/) was used to build, run, and evaluate
+the SFINCS case. The AutoCF software distribution is not included. See
+`CREDITS_AND_CITATIONS.md` for the full citation and software/data
+acknowledgments. Third-party datasets and software retain their original
+licenses.

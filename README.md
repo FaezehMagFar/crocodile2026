@@ -91,11 +91,14 @@ by this workflow and do not imply endorsement of this project.
 **AutoCF v1.0.0 HPC release** was used to automate the Galveston Bay SFINCS
 model build, execute the GPU run, prepare forcing and terrain inputs, and
 create evaluation and provenance products. AutoCF executables, compiled
-modules, containers, and installers are not redistributed here. The available
-release did not provide a public bibliographic citation, so it is identified as:
+modules, containers, and installers are not redistributed here.
 
-> AutoCF, version 1.0.0 HPC release (2026), computer software used for SFINCS
-> model construction, execution, evaluation, and provenance generation.
+**Website:** [https://autocf.net/](https://autocf.net/)
+
+> Radfar, S., Maghsoodifar, F., Lin, N., & Moftakhari, H. (2026). *AutoCF: An
+> Automated LLM-Assisted Ecosystem for Compound Flood Simulation, Evaluation,
+> and Impact Attribution*. arXiv:2609.35753.
+> [https://doi.org/10.48550/arXiv.2609.35753](https://doi.org/10.48550/arXiv.2609.35753)
 
 ### Modeling and workflow software
 

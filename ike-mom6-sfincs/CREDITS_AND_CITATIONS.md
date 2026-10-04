@@ -19,16 +19,17 @@ the evaluation/provenance products. The exact recorded commands are in
 `sfincs/config/hydromt/`.
 
 The AutoCF executable, compiled Python modules, containers, and installer are
-**not redistributed** in this repository. The available release did not provide
-a public DOI or a complete bibliographic citation in the project materials.
-Until the provider supplies one, identify it explicitly as:
+**not redistributed** in this repository.
 
-> AutoCF, version 1.0.0 HPC release (2026), computer software used for SFINCS
-> model construction, execution, evaluation, and provenance generation.
+**Website:** [https://autocf.net/](https://autocf.net/)
+
+> Radfar, S., Maghsoodifar, F., Lin, N., & Moftakhari, H. (2026). *AutoCF: An
+> Automated LLM-Assisted Ecosystem for Compound Flood Simulation, Evaluation,
+> and Impact Attribution*. arXiv:2609.35753.
+> [https://doi.org/10.48550/arXiv.2609.35753](https://doi.org/10.48550/arXiv.2609.35753)
 
 Users who have the AutoCF distribution must also follow its bundled license and
-review notice. If an official AutoCF DOI or author list becomes available, that
-official citation should replace the provisional wording above.
+review notice.
 
 ## Modeling and workflow software
 

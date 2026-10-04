@@ -5,6 +5,10 @@
 This directory contains the curated research materials for the Hurricane Ike
 (2008) ERA5–regional MOM6–SFINCS workflow.
 
+This work was developed as a participant project during the
+[2026 CROCODILE + MOM6 Workshop](https://www.cesm.ucar.edu/events/2026/CROCODILE-Workshop)
+at the NSF NCAR Mesa Laboratory in Boulder, Colorado.
+
 ## Results
 
 ### ERA5–MOM6 and Copernicus sea level
@@ -16,7 +20,7 @@ landfall-day mean, not an observation at the exact landfall hour.
 
 ### SFINCS flood inundation
 
-![SFINCS Hurricane Ike flood-inundation animation](figures/sfincs_ike_flood_animation.gif)
+![SFINCS Hurricane Ike flood-inundation animation](figures/sfincs_ike_flood_animation.webp)
 
 This animation is generated from the hourly `sfincs_map.nc` output. It shows
 `zs - zb` on model cells that were dry at the first output time and later had a
@@ -29,7 +33,7 @@ Key outputs:
 
 - [`Presentation.pptx`](../Presentation.pptx) — complete presentation with
   embedded media, stored at the repository root.
-- `figures/` — static figures and GitHub-playable GIF animations.
+- `figures/` — static figures and GitHub-playable animations.
 - `sfincs/results/` — compact evaluation figures, tables, and provenance.
 - `sfincs/archive/SFINCS_Model_Galveston_Ike_2008.zip` — complete SFINCS model
   package, stored with Git LFS.

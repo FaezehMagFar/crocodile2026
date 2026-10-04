@@ -7,6 +7,13 @@ workflow for Hurricane Ike (2008). It combines ERA5 atmospheric forcing,
 CrocoDash/CESM regional MOM6, SFINCS for Galveston Bay, NOAA observations, and
 Copernicus DUACS sea-level data.
 
+## Workshop project
+
+This Hurricane Ike workflow was developed as a participant project during the
+[2026 Regional Ocean Modeling with MOM6 in the Community Earth System Model Framework](https://www.cesm.ucar.edu/events/2026/CROCODILE-Workshop)
+**CROCODILE + MOM6 Workshop**, held September 28–October 2, 2026 at the NSF
+NCAR Mesa Laboratory in Boulder, Colorado.
+
 ## Animated results
 
 ### ERA5–MOM6 and Copernicus sea level
@@ -22,7 +29,7 @@ An additional MOM6 sea-surface-height animation is available
 
 ### SFINCS flood inundation
 
-![SFINCS Hurricane Ike flood-inundation animation](ike-mom6-sfincs/figures/sfincs_ike_flood_animation.gif)
+![SFINCS Hurricane Ike flood-inundation animation](ike-mom6-sfincs/figures/sfincs_ike_flood_animation.webp)
 
 The SFINCS animation covers 2008-09-08 through 2008-09-16 and displays every
 third hourly output, with the exact 2008-09-13 07:00 UTC landfall frame added.

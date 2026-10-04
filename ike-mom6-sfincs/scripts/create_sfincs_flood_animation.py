@@ -37,8 +37,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output",
         type=Path,
-        default=Path("sfincs_ike_flood_animation.gif"),
-        help="Output GIF path",
+        default=Path("sfincs_ike_flood_animation.webp"),
+        help="Output animated WebP or GIF path",
     )
     parser.add_argument(
         "--frame-step",
@@ -155,19 +155,19 @@ def main() -> None:
                 np.nanmax(y),
             ]
 
-        fig, axis = plt.subplots(figsize=(6.8, 6.5), dpi=100)
+        fig, axis = plt.subplots(figsize=(8.4, 8.0), dpi=100)
         fig.subplots_adjust(left=0.105, right=0.87, bottom=0.105, top=0.89)
         axis.set_xlim(extent[0], extent[1])
         axis.set_ylim(extent[2], extent[3])
 
         # Esri imagery plus its transparent reference layer creates the
         # satellite-hybrid background. The map is fetched once and reused for
-        # all GIF frames.
+        # all animation frames.
         cx.add_basemap(
             axis,
             source=cx.providers.Esri.WorldImagery,
             crs="EPSG:32615",
-            zoom=10,
+            zoom=11,
             reset_extent=True,
             attribution=False,
         )
@@ -202,7 +202,7 @@ def main() -> None:
             axis,
             source=reference_tiles,
             crs="EPSG:32615",
-            zoom=10,
+            zoom=11,
             reset_extent=True,
             attribution=False,
             zorder=4,
@@ -295,7 +295,6 @@ def main() -> None:
             fig.canvas.draw()
             rgba = np.asarray(fig.canvas.buffer_rgba()).copy()
             frame = Image.fromarray(rgba, mode="RGBA").convert("RGB")
-            frame = frame.quantize(colors=72, method=Image.Quantize.MEDIANCUT)
             frames.append(frame)
 
             if index == landfall_index:
@@ -309,19 +308,41 @@ def main() -> None:
 
         plt.close(fig)
 
-    frames[0].save(
-        args.output,
-        save_all=True,
-        append_images=frames[1:],
-        duration=durations,
-        loop=0,
-        disposal=2,
-        optimize=False,
-    )
+    suffix = args.output.suffix.lower()
+    if suffix == ".webp":
+        frames[0].save(
+            args.output,
+            format="WEBP",
+            save_all=True,
+            append_images=frames[1:],
+            duration=durations,
+            loop=0,
+            quality=86,
+            method=6,
+            minimize_size=True,
+            allow_mixed=True,
+        )
+    elif suffix == ".gif":
+        palette_frames = [
+            frame.quantize(colors=96, method=Image.Quantize.MEDIANCUT)
+            for frame in frames
+        ]
+        palette_frames[0].save(
+            args.output,
+            format="GIF",
+            save_all=True,
+            append_images=palette_frames[1:],
+            duration=durations,
+            loop=0,
+            disposal=2,
+            optimize=False,
+        )
+    else:
+        raise ValueError("Output extension must be .webp or .gif")
 
     size_mib = args.output.stat().st_size / (1024 * 1024)
     print(f"Saved {len(frames)} frames: {args.output}")
-    print(f"GIF size: {size_mib:.2f} MiB")
+    print(f"Animation size: {size_mib:.2f} MiB")
     print(f"Peak newly inundated cells in sampled frames: {peak_flooded_cells:,}")
     print(f"Landfall frame: {timestamps[landfall_index]:%Y-%m-%d %H:%M UTC}")
 

@@ -27,30 +27,18 @@ plays directly on GitHub. The Copernicus product is daily, so the frame for
 An additional MOM6 sea-surface-height animation is available
 [here](ike-mom6-sfincs/figures/gom12_ike_ERA5full.001_ssh_ike.gif).
 
-### SFINCS flood inundation
+### SFINCS flood propagation in AutoViz3D
 
-![SFINCS Hurricane Ike flood-inundation animation](ike-mom6-sfincs/figures/sfincs_ike_flood_animation.webp)
+![SFINCS Hurricane Ike flood propagation in AutoViz3D](ike-mom6-sfincs/figures/sfincs_autoviz3d_map_flood_animation.gif)
 
-The SFINCS animation covers 2008-09-08 through 2008-09-16 and displays every
-third hourly output, with the exact 2008-09-13 07:00 UTC landfall frame added.
-Flood depth is shown only where an initially dry model cell subsequently has at
-least 0.05 m of water, over an Esri satellite-hybrid basemap.
+The AutoViz3D Map Explorer animation covers 2008-09-08 through 2008-09-16 and
+shows the modeled flood-water propagation across Galveston Bay over Esri World
+Imagery. The GitHub preview retains every third model output and displays each
+frame for 0.3 seconds so the progression remains readable. Model timestamps are
+shown in UTC. World Imagery © Esri and its data providers.
 
-### 3D Galveston Bay terrain view
-
-The [interactive 3D map](ike-mom6-sfincs/interactive/sfincs_3d_city.html)
-places the SFINCS maximum newly inundated depth over Esri satellite imagery and
-extrudes real OpenStreetMap building footprints using mapped building heights.
-It includes close Galveston-city and full Galveston-Bay camera views, plus a
-terrain surface and hillshade. The looping GIF below keeps the whole-bay camera
-fixed and shows the actual SFINCS inundation propagating from 127 hours before
-through 65 hours after Ike's landfall. It slows to hourly output around
-landfall, with timestamps and 3× terrain exaggeration so changes remain easy to
-follow. Download or clone the repository and follow the short
-[launch instructions](ike-mom6-sfincs/interactive/README.md) to explore it in a
-browser.
-
-[![SFINCS flood-water propagation over 3D Galveston Bay terrain](ike-mom6-sfincs/figures/sfincs_3d_galveston_animation.gif)](ike-mom6-sfincs/interactive/sfincs_3d_city.html)
+The [interactive 3D map](ike-mom6-sfincs/interactive/sfincs_3d_city.html) is
+also available for exploring the Galveston Bay terrain and city-scale view.
 
 ## Main project files
 

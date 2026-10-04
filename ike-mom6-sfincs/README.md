@@ -18,16 +18,15 @@ at the NSF NCAR Mesa Laboratory in Boulder, Colorado.
 The comparison uses daily Copernicus DUACS fields. The 2008-09-13 frame is the
 landfall-day mean, not an observation at the exact landfall hour.
 
-### SFINCS flood inundation
+### SFINCS flood propagation in AutoViz3D
 
-![SFINCS Hurricane Ike flood-inundation animation](figures/sfincs_ike_flood_animation.webp)
+![SFINCS Hurricane Ike flood propagation in AutoViz3D](figures/sfincs_autoviz3d_map_flood_animation.gif)
 
-This animation is generated from the hourly `sfincs_map.nc` output. It shows
-`zs - zb` on model cells that were dry at the first output time and later had a
-water depth of at least 0.05 m. Every third hourly frame is displayed, and the
-exact 2008-09-13 07:00 UTC Ike landfall frame is included. Esri World Imagery
-and the World Boundaries and Places reference layer provide the
-satellite-hybrid basemap.
+The AutoViz3D Map Explorer animation uses the hourly `sfincs_map.nc` output and
+covers 2008-09-08 through 2008-09-16. The GitHub preview retains every third
+model output and displays each frame for 0.3 seconds so the progression remains
+readable. Model timestamps are shown in UTC over Esri World Imagery. World
+Imagery © Esri and its data providers.
 
 Key outputs:
 

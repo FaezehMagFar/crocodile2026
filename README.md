@@ -42,13 +42,15 @@ The [interactive 3D map](ike-mom6-sfincs/interactive/sfincs_3d_city.html)
 places the SFINCS maximum newly inundated depth over Esri satellite imagery and
 extrudes real OpenStreetMap building footprints using mapped building heights.
 It includes close Galveston-city and full Galveston-Bay camera views, plus a
-terrain surface and hillshade. The looping GIF below rotates around the whole
-bay with 3× terrain exaggeration so the naturally low coastal relief remains
-visible. Download or clone the repository and follow the short
+terrain surface and hillshade. The looping GIF below keeps the whole-bay camera
+fixed and shows the actual SFINCS inundation propagating from 127 hours before
+through 65 hours after Ike's landfall. It slows to hourly output around
+landfall, with timestamps and 3× terrain exaggeration so changes remain easy to
+follow. Download or clone the repository and follow the short
 [launch instructions](ike-mom6-sfincs/interactive/README.md) to explore it in a
 browser.
 
-[![3D SFINCS flood and terrain animation over Galveston Bay](ike-mom6-sfincs/figures/sfincs_3d_galveston_animation.gif)](ike-mom6-sfincs/interactive/sfincs_3d_city.html)
+[![SFINCS flood-water propagation over 3D Galveston Bay terrain](ike-mom6-sfincs/figures/sfincs_3d_galveston_animation.gif)](ike-mom6-sfincs/interactive/sfincs_3d_city.html)
 
 ## Main project files
 

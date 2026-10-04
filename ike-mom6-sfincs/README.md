@@ -25,6 +25,14 @@ exact 2008-09-13 07:00 UTC Ike landfall frame is included. Esri World Imagery
 and the World Boundaries and Places reference layer provide the
 satellite-hybrid basemap.
 
+### SFINCS 3D model view
+
+![SFINCS Hurricane Ike 3D flood-inundation view](figures/sfincs_ike_flood_3d.png)
+
+The satellite-hybrid imagery is draped over the SFINCS bed-elevation surface.
+Colored water markers show the maximum depth reached on cells that were dry at
+the first model-output time. The vertical scale is exaggerated for visibility.
+
 Key outputs:
 
 - [`Presentation.pptx`](../Presentation.pptx) — complete presentation with
